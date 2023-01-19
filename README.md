@@ -39,3 +39,21 @@ Compile and install after every modification of the c++ detector constructor cod
 ```bash
 cmake --build build -- install
 ```
+
+# Run simple simulation
+
+Use this command to open the Geant4 Qt application,
+
+```shell
+ddsim --compactFile compact/arc_v0.xml \ 
+      --enableGun \ 
+      --gun.distribution uniform \ 
+      --gun.energy "10*GeV" \ 
+      --gun.particle mu- \ 
+      --numberOfEvents 1 \ 
+      --runType qt \ 
+      --part.userParticleHandler='' \ 
+      --macroFile myscripts/vis.mac 
+```
+
+then press play button on top to launch one event.

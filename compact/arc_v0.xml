@@ -1,6 +1,14 @@
 <lccdd >
 
-
+  <info name="clic_sid_cdr"
+        title="CLIC Silicon Detector CDR"
+        author="Christian Grefe"
+        url="https://twiki.cern.ch/twiki/bin/view/CLIC/ClicSidCdr"
+        status="development"
+        version="$Id: compact.xml 1374 2014-11-05 10:49:55Z markus.frank@cern.ch $">
+    <comment>The compact format for the CLIC Silicon Detector used for the conceptual design report</comment>
+  </info>
+  
 <includes>
   <gdmlFile ref="elements.xml"/>
   <gdmlFile ref="materials.xml"/>
