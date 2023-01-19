@@ -1,14 +1,14 @@
 <lccdd >
 
-  <info name="clic_sid_cdr"
-        title="CLIC Silicon Detector CDR"
-        author="Christian Grefe"
-        url="https://twiki.cern.ch/twiki/bin/view/CLIC/ClicSidCdr"
+  <info name="ARC"
+        title="Array of RICH Cells (ARC)"
+        author="A. Tolosa Delgado, Martin Tat, Roger Forty, Guy Wilkinson"
+        url="https://indico.cern.ch/event/1231098/"
         status="development"
-        version="$Id: compact.xml 1374 2014-11-05 10:49:55Z markus.frank@cern.ch $">
-    <comment>The compact format for the CLIC Silicon Detector used for the conceptual design report</comment>
+        version="$version 0. Date: 2023-01-19. Author emails: alvaro.tolosa.delgado@cern.ch, martin.tat@physics.ox.ac.uk$">
+    <comment>The compact format of the ARC detector</comment>
   </info>
-  
+
 <includes>
   <gdmlFile ref="elements.xml"/>
   <gdmlFile ref="materials.xml"/>
