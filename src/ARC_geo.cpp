@@ -33,7 +33,6 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
   auto gasvolMat = desc.material(detElem.attr<std::string>(_Unicode(gas)));
   auto vesselVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(vis_vessel)));
   auto gasvolVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(vis_gas)));
-  auto sensorVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(vis_sensor)));
 
   double sensor_thickness = 1.0 * mm;
 
@@ -61,7 +60,6 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
                     cell_y / 2. - cell_wall_thickness,
                     sensor_thickness / 2.);
     Volume sensorVol(detName + "_sensor", sensorShape, desc.material("Silicon"));
-    sensorVol.setVisAttributes(sensorVis);
     gasvolVol.placeVolume(sensorVol, Position(0, 0, -cell_z / 2. + cell_wall_thickness + sensor_thickness / 2.));
   }
 
