@@ -48,9 +48,22 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
   // - sensor module
   auto   sensorElem         = detElem.child(_Unicode(sensors)).child(_Unicode(module));
   auto   sensorVis          = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
-  double sensorSide         = sensorElem.attr<double>(_Unicode(side));
+  double sensorX            = sensorElem.attr<double>(_Unicode(sensorX));
+  double sensorY            = sensorElem.attr<double>(_Unicode(sensorY));
   double sensorThickness    = sensorElem.attr<double>(_Unicode(thickness));
   auto   sensorSurf         = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
+
+  // - aerogel
+  auto   aerogelElem        = detElem.child(_Unicode(aerogel)).child(_Unicode(module));
+  auto   aerogelVis         = desc.visAttributes(aerogelElem.attr<std::string>(_Unicode(vis)));
+  auto   aerogelMat         = desc.material(detElem.attr<std::string>(_Unicode(material)));
+  double aerogel_thickness  = aerogelElem.attr<double>(_Unicode(thickness));
+
+  // - cooling
+  auto   coolingElem        = detElem.child(_Unicode(cooling)).child(_Unicode(module));
+  auto   coolingVis         = desc.visAttributes(coolingElem.attr<std::string>(_Unicode(vis)));
+  auto   coolingMat         = desc.material(detElem.attr<std::string>(_Unicode(material)));
+  double cooling_thickness  = coolingElem.attr<double>(_Unicode(thickness));
 
   ///----------->>> Define vessel and gas volumes
   /* - `vessel`: aluminum enclosure, mother volume
@@ -58,29 +71,67 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
    *   are children of `gasvol`
    */
 
-  double gasUpperZlimit = cell_z / 2. - cell_wall_thickness;
+  // Vessel
   Box vesselSolid(cell_x / 2.,
                   cell_y / 2.,
                   cell_z / 2.);
+  Volume vesselVol(detName, vesselSolid, vesselMat);
+  vesselVol.setVisAttributes(vesselVis);
+
+  // Gas
+  // Thickness of gas volume (z-direction) if we ignore the mirror
+  double gasThickness = cell_z - 2 * cell_wall_thickness - cooling_thickness - aerogel_thickness;
+
   Box gasvolSolid(cell_x / 2. - cell_wall_thickness,
                   cell_y / 2. - cell_wall_thickness,
-                  gasUpperZlimit);
-
-  Volume vesselVol(detName, vesselSolid, vesselMat);
+                  gasThickness / 2.);
   Volume gasvolVol(detName + "_gas", gasvolSolid, gasvolMat);
-  vesselVol.setVisAttributes(vesselVis);
+
   gasvolVol.setVisAttributes(gasvolVis);
+
+  // place gas volume
+  // z-position of gas volume
+  double gasCentre    = (aerogel_thickness + cooling_thickness) / 2.;
+  /* PlacedVolume gasvolPV = */ vesselVol.placeVolume(gasvolVol, Position(0, 0, gasCentre));
+
+  ///----------->>> Aerogel
+  {
+    Box aerogelSolid(cell_x / 2. - cell_wall_thickness,
+		     cell_y / 2. - cell_wall_thickness,
+		     aerogel_thickness / 2.);
+    Volume aerogelVol(detName + "_aerogel", aerogelSolid, aerogelMat);
+
+    aerogelVol.setVisAttributes(aerogelVis);
+
+    // place aerogel volume
+    // z-position of gas volume
+    double aerogelCentre    = gasCentre - gasThickness / 2. - aerogel_thickness / 2.;
+    /* PlacedVolume aerogelPV = */ vesselVol.placeVolume(aerogelVol, Position(0, 0, aerogelCentre));
+  }
+
+  ///----------->>> Cooling layer
+  Box coolingSolid(cell_x / 2. - cell_wall_thickness,
+		   cell_y / 2. - cell_wall_thickness,
+		   cooling_thickness / 2.);
+  Volume coolingVol(detName + "_cooling", coolingSolid, coolingMat);
+
+  coolingVol.setVisAttributes(coolingVis);
+
+  // place cooling volume
+  // z-position of gas volume
+  double coolingCentre    = gasCentre - gasThickness / 2. - aerogel_thickness - cooling_thickness / 2.;
+  /* PlacedVolume coolingPV = */ vesselVol.placeVolume(coolingVol, Position(0, 0, coolingCentre));
 
   ///----------->>> Sensor
   {
-    Box sensorShape( sensorSide/2.0,
-                     sensorSide/2.0,
+    Box sensorShape(sensorX / 2.,
+                    sensorY / 2.,
                     sensorThickness / 2.);
     Volume sensorVol(detName + "_sensor", sensorShape, desc.material("AirOptical"));
 
     sensorVol.setVisAttributes(sensorVis);
     sensorVol.setSensitiveDetector(sens);
-    PlacedVolume sensorPV = gasvolVol.placeVolume(sensorVol, Position(0, 0, -cell_z / 2. + cell_wall_thickness + sensorThickness / 2.));
+    PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, Position(0, 0, cooling_thickness - sensorThickness / 2.));
     sensorPV.addPhysVolID("module", 123);
 
     // Make sensor sensitive + define optical properties
@@ -93,11 +144,12 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
   {
     // define "mirrorVolFull" as a hollow sphere of Aluminium 
     Sphere mirrorShapeFull( mirrorR - mirrorThickness,
-                            mirrorR ,
+                            mirrorR,
                             0.,
                             3.14/2);
 
     // 3D transformation of mirrorVolFull in order to place it inside the gas volume
+    double gasUpperZlimit = gasCentre + gasThickness / 2.;
     Transform3D mirrorTr( RotationZYX(0.,0,0.), Translation3D( 0 , 0 , gasUpperZlimit - mirrorR ) );
 
     // Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
@@ -105,15 +157,7 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
     Volume mirrorVol(detName + "_mirror", mirrorSol, mirrorMat);
     mirrorVol.setVisAttributes(mirrorVis);
     /* PlacedVolume mirrorPV =*/ gasvolVol.placeVolume(mirrorVol);
-
-
-
   }
-
-
-
-  // place gas volume
-  /* PlacedVolume gasvolPV = */ vesselVol.placeVolume(gasvolVol, Position(0, 0, 0));
 
   // place mother volume (vessel)
   Volume motherVol = desc.pickMotherVolume(det);

@@ -15,12 +15,13 @@
 </includes>
 
 <display>
-  <vis name="vessel_vis"  r="102/256" g="102/256" b="102/256" alpha="0.1" showDaughters="true" visible="true" />
-  <vis name="gas_vis"     r="100/256" g="200/256" b="0/256"   alpha="0.1" showDaughters="true" visible="true" />
-  <vis name="aerogel_vis" r="0/256"   g="161/256" b="156/256" alpha="1.0" showDaughters="true" visible="true" />
-  <vis name="sensor_vis"  r="248/256" g="188/256" b="0/256"   alpha="1.0" showDaughters="true" visible="true" />
-  <vis name="filter_vis"  r="0/256"   g="96/256"  b="156/256" alpha="1.0" showDaughters="true" visible="true" />
-  <vis name="service_vis" r="102/256" g="102/256" b="102/256" alpha="1.0" showDaughters="true" visible="true" />
+  <vis name="vessel_vis"  r="236/256" g="237/256" b="232/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="gas_vis"     r="227/256" g="239/256" b="217/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="aerogel_vis" r="244/256" g="177/256" b="132/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="cooling_vis" r="254/256" g="230/256" b="151/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="sensor_vis"  r="255/256" g="0/256"   b="0/256"   alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="filter_vis"  r="0/256"   g="96/256"  b="156/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis"  r="255/256" g="230/256" b="153/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="no_vis" showDaughters="false" visible="false" />
 </display>
 
@@ -29,13 +30,17 @@
   <constant name="world_x"                value="world_side"/>
   <constant name="world_y"                value="world_side"/>
   <constant name="world_z"                value="100*m"     />
-  <constant name="CELL_X"                 value="20*cm"     />
-  <constant name="CELL_Y"                 value="20*cm"     />
+  <constant name="CELL_X"                 value="27*cm"     />
+  <constant name="CELL_Y"                 value="27*cm"     />
   <constant name="CELL_Z"                 value="20*cm"     />
-  <constant name="CELL_WALL_THICKNESS"    value="1.1*cm"    />
-  <constant name="SENSOR_THICKNESS"       value="1.1*cm"    />
-  <constant name="MIRROR_THICKNESS"       value="1.1*cm"    />
-  <constant name="MIRROR_RADIUS"          value="20.0*cm"   />
+  <constant name="CELL_WALL_THICKNESS"    value="1.0*cm"    />
+  <constant name="SENSOR_THICKNESS"       value="0.2*cm"    />
+  <constant name="SENSOR_X"               value="8.0*cm"    />
+  <constant name="SENSOR_Y"               value="8.0*cm"    />
+  <constant name="MIRROR_THICKNESS"       value="0.2*cm"    />
+  <constant name="MIRROR_RADIUS"          value="36.9*cm"   />
+  <constant name="COOLING_THICKNESS"      value="0.5*cm"    />
+  <constant name="AEROGEL_THICKNESS"      value="1.0*cm"    />
 </define>
 
 <detectors>
@@ -74,7 +79,8 @@
       material="AirOptical"
       surface="SensorSurface_PFRICH"
       vis="sensor_vis"
-      side="CELL_X - 2.*CELL_WALL_THICKNESS"
+      sensorX="SENSOR_X"
+      sensorY="SENSOR_Y"
       thickness="SENSOR_THICKNESS"
       />
   </sensors>
@@ -84,11 +90,31 @@
     <!-- /detectors/detector/mirror/module -->
     <module
       material="Aluminum"
-      vis="service_vis"
+      vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
       radius="MIRROR_RADIUS"
       />
   </mirror>
+
+<!-- /detectors/detector/aerogel -->
+  <aerogel>
+    <!-- /detectors/detector/aerogel/module -->
+    <module
+      material="Aluminum"
+      vis="aerogel_vis"
+      thickness="AEROGEL_THICKNESS"
+      />
+  </aerogel>
+
+<!-- /detectors/detector/cooling -->
+  <cooling>
+    <!-- /detectors/detector/cooling/module -->
+    <module
+      material="Aluminum"
+      vis="cooling_vis"
+      thickness="COOLING_THICKNESS"
+      />
+  </cooling>
 
 
   </detector>
