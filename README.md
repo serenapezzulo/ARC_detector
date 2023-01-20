@@ -28,6 +28,12 @@ To display the geometry
 geoDisplay compact/arc_v0.xml 
 ```
 
+To convert the geometry into ROOT
+
+```bash
+./myscripts/dd4hep2root -c  compact/arc_v0.xml -o arc_v0.root
+```
+
 To show materials in along a given line (in this case from origin to (0,0,-100)cm)
 
 ```bash
