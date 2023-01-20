@@ -25,14 +25,17 @@
 </display>
 
 <define>
-  <constant name="world_side"           value="30*m"      />
-  <constant name="world_x"              value="world_side"/>
-  <constant name="world_y"              value="world_side"/>
-  <constant name="world_z"              value="100*m"     />
-  <constant name="CELL_X"               value="20*cm"     />
-  <constant name="CELL_Y"               value="20*cm"     />
-  <constant name="CELL_Z"               value="20*cm"     />
-  <constant name="CELL_WALL_THICKNESS"  value="0.1*cm"    />
+  <constant name="world_side"             value="30*m"      />
+  <constant name="world_x"                value="world_side"/>
+  <constant name="world_y"                value="world_side"/>
+  <constant name="world_z"                value="100*m"     />
+  <constant name="CELL_X"                 value="20*cm"     />
+  <constant name="CELL_Y"                 value="20*cm"     />
+  <constant name="CELL_Z"                 value="20*cm"     />
+  <constant name="CELL_WALL_THICKNESS"    value="1.1*cm"    />
+  <constant name="SENSOR_THICKNESS"       value="1.1*cm"    />
+  <constant name="MIRROR_THICKNESS"       value="1.1*cm"    />
+  <constant name="MIRROR_RADIUS"          value="20.0*cm"   />
 </define>
 
 <detectors>
@@ -44,6 +47,7 @@
     material="Aluminum"
     vis_vessel="vessel_vis"
     vis_gas="gas_vis"
+    readout="ARC_HITS"
     >
 
     <dimensions
@@ -52,10 +56,49 @@
       cell_z="CELL_Z"
       cell_wall_thickness="CELL_WALL_THICKNESS"
       />
+<!-- /detectors/detector/sensors -->
+  <comment>
+    #### Sensors
+  </comment>
+  <sensors>
+    <!-- /detectors/detector/sensors/module -->
+    <comment>
+      ##### Sensor module
+      - dimensions:
+        - `side`:      side length of the square module
+        - `thickness`: thickness of the sensor module
+      - notes:
+        - the material is `AirOptical`, to resolve a technical issue with the refractive boundary
+    </comment>
+    <module
+      material="AirOptical"
+      surface="SensorSurface_PFRICH"
+      vis="sensor_vis"
+      side="CELL_X - 2.*CELL_WALL_THICKNESS"
+      thickness="SENSOR_THICKNESS"
+      />
+  </sensors>
+
+<!-- /detectors/detector/mirror -->
+  <mirror>
+    <!-- /detectors/detector/mirror/module -->
+    <module
+      material="Aluminum"
+      vis="service_vis"
+      thickness="MIRROR_THICKNESS"
+      radius="MIRROR_RADIUS"
+      />
+  </mirror>
+
 
   </detector>
 </detectors>
 
 
+<readouts>
+  <readout name="ARC_HITS">
+    <id>system:8,module:12</id>
+  </readout>
+</readouts>
 
 </lccdd>
