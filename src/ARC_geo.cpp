@@ -131,7 +131,7 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
 
     sensorVol.setVisAttributes(sensorVis);
     sensorVol.setSensitiveDetector(sens);
-    PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, Position(0, 0, cooling_thickness - sensorThickness / 2.));
+    PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, Position(0, 0, ( cooling_thickness - sensorThickness ) / 2.));
     sensorPV.addPhysVolID("module", 123);
 
     // Make sensor sensitive + define optical properties
