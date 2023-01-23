@@ -149,8 +149,7 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
                             3.14/2);
 
     // 3D transformation of mirrorVolFull in order to place it inside the gas volume
-    double gasUpperZlimit = gasCentre + gasThickness / 2.;
-    Transform3D mirrorTr( RotationZYX(0.,0,0.), Translation3D( 0 , 0 , gasUpperZlimit - mirrorR ) );
+    Transform3D mirrorTr( RotationZYX(0.,0,0.), Translation3D( 0 , 0 , gasThickness / 2. - mirrorR) );
 
     // Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
     Solid mirrorSol = IntersectionSolid(gasvolSolid, mirrorShapeFull, mirrorTr);
