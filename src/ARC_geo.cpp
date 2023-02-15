@@ -92,17 +92,16 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
 
   ///----------->>> Aerogel (+sensor)
   {
-    Box aerogelSolid(cell_x / 2. - cell_wall_thickness,
+    Box coolingSolid(cell_x / 2. - cell_wall_thickness,
                      cell_y / 2. - cell_wall_thickness,
-                     aerogel_thickness / 2.);
-    Volume aerogelVol(detName + "_aerogel", aerogelSolid, gasvolMat);
-    aerogelVol.setVisAttributes(aerogelVis);
+                     cooling_thickness / 2.);
+    Volume coolingVol(detName + "cooling", coolingSolid, coolingMat);
+    coolingVol.setVisAttributes(coolingVis);
 
-    // place aerogel volume
-    // z-position of gas volume
-    double aerogelCentre = -gasThickness / 2. + aerogel_thickness / 2.;
-    PlacedVolume aerogelPV = gasvolVol.placeVolume(aerogelVol, Position(0, 0, aerogelCentre));
-    aerogelPV.addPhysVolID("module", 63);
+    // place cooling volume
+    double coolingCentre = -gasThickness / 2. + cooling_thickness / 2.;
+    PlacedVolume coolingPV = gasvolVol.placeVolume(coolingVol, Position(0, 0, coolingCentre));
+    coolingPV.addPhysVolID("module", 63);
 
     ///----------->>> Sensor
     {
@@ -113,7 +112,8 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
 
       sensorVol.setVisAttributes(sensorVis);
       sensorVol.setSensitiveDetector(sens);
-      PlacedVolume sensorPV = aerogelVol.placeVolume(sensorVol, Position(0, 0, -aerogel_thickness / 2. + sensorThickness / 2.));
+      double sensorCentre = cooling_thickness / 2. - sensorThickness / 2.;
+      PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, Position(0, 0, sensorCentre ));
       sensorPV.addPhysVolID("module", 127);
 
       // // Make sensor sensitive + define optical properties
@@ -123,7 +123,20 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
       // sensorSkin.isValid();
     }
   }
+  ///----------->>> Aerogel (+sensor)
+  {
+    Box aerogelSolid(cell_x / 2. - cell_wall_thickness,
+                     cell_y / 2. - cell_wall_thickness,
+                     aerogel_thickness / 2.);
+    Volume aerogelVol(detName + "_aerogel", aerogelSolid, aerogelMat);
+    aerogelVol.setVisAttributes(aerogelVis);
 
+    // place aerogel volume
+    // z-position of gas volume
+    double aerogelCentre = cooling_thickness -gasThickness / 2. + aerogel_thickness / 2.;
+    /*PlacedVolume aerogelPV = */ gasvolVol.placeVolume(aerogelVol, Position(0, 0, aerogelCentre));
+
+  }
   ///----------->>> Mirror
   {
     // define "mirrorVolFull" as a hollow sphere of Aluminium
