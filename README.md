@@ -34,16 +34,7 @@ To convert the geometry into ROOT
 ./myscripts/dd4hep2root -c  compact/arc_v0.xml -o arc_v0.root
 ```
 
-To show materials in along a given line (in this case from origin to (0,0,-100)cm)
-
-```bash
-materialScan compact/arc_v0.xml 0 0 0 0 0 -100
-```
-
-To check overlaps, we can use Geant4 check
-```shell
-ddsim --compactFile ./compact/arc_v0.xml --runType run --part.userParticleHandler='' --macroFile myscripts/overlap.mac >> overlapDump.txt
-```
+# Things to do after every change
 
 Compile and install after every modification of the c++ detector constructor code.
 
@@ -51,23 +42,47 @@ Compile and install after every modification of the c++ detector constructor cod
 cmake --build build -- install
 ```
 
-# Run simple simulation
+To show materials in along a given line (in this case from origin to (0,0,-100)cm), check if the modified volume has the proper material
+
+```bash
+materialScan compact/arc_v0.xml 0 0 0 0 0 -100
+```
+
+Check overlaps, using Geant4 check
+```shell
+ddsim --compactFile ./compact/arc_v0.xml --runType run --part.userParticleHandler='' --macroFile myscripts/overlap.mac >> overlapDump.txt
+```
+
+
+# Run simulation
+
+The script `arcsim.py` is a ddsim steering file, which enable Qt visualization, setup the cerenkov physic lists and the default input and output files. The configuration inside the steering file can be overriden if options are added after the name of the steering file (see -N 1 example below). 
 
 Use this command to open the Geant4 Qt application,
 
 ```shell
-ddsim --compactFile compact/arc_v0.xml \ 
-      --enableGun \ 
-      --gun.distribution uniform \ 
-      --gun.energy "10*GeV" \ 
-      --gun.particle mu- \ 
-      --numberOfEvents 1 \ 
-      --runType qt \ 
-      --part.userParticleHandler='' \ 
-      --macroFile myscripts/vis.mac 
+python arcsim.py -N 1
 ```
 
-then press play button on top to launch one event.
+then press play button on top to launch one event. The geometry and tracks of one charged pion (pink) crossing the detector, and the cerenkov photons (grey) are displayed below.
+
+
+![Visualization of geometry and tracks of one charged pion (pink) crossing the detector, and the cerenkov photons (grey).](https://mattermost.web.cern.ch/files/4eyjw6q8b38tfkmh5nrf7qytsr/public?h=rLXJPn3Zsd6-0g3Q9ZaqHI9pAFglRqD_kix70QP6nXs)
+
+
+
+More events can be simulated, but in this case only 1 will be saved into the output file `arcsim.root`. To visualize the hit pattern in the detector, we can open the root file and write the following in the command line
+
+```cpp
+EVENT->Draw("ARC_HITS.position.Y():ARC_HITS.position.X()");
+```
+
+A new canvas will open showing something similar to the following graph:
+
+![Hit pattern of photons (and pion) in the detector](https://mattermost.web.cern.ch/files/11f17b5nctfkjqjsw1cmoh1rko/public?h=OQCOs1RkwC560pOU0reOnG9pJabN4rDqTu2wgqHeHNg)
+
+Hit pattern of photons (and pion) in the detector
+
 
 # Useful links
 
