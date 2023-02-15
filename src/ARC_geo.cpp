@@ -68,9 +68,10 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
   ///----------->>> Define vessel and gas volumes
   /* - `vessel`: aluminum enclosure, mother volume
    * - `gasvol`: gas volume, which fills `vessel`; all other volumes defined below
-   *   as children of `gasvol`
-   * vessel (cubic) -> Gasvol (cubic) -> Aerogel (cubic) -> Sensor CCD (cubic)
+   *   as children of `gasvol`. Sensor is placed inside Cooling.
+   * vessel (cubic) -> Gasvol (cubic) -> Cooling (cubic) -> Sensor CCD (cubic)
    *                                 \-> Mirror (sphere intersection with gasvol)
+   *                                 \-> Aerogel 
    */
 
   // Vessel
