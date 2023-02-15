@@ -375,6 +375,13 @@
         7*eV  1
         "/>
     </opticalsurface>
+        <opticalsurface name="MirrorSurface" model="glisur" finish="polished" type="dielectric_metal">
+      <property name="REFLECTIVITY" coldim="2" values="
+        1*eV  1
+        4*eV  1
+        7*eV  1
+        "/>
+    </opticalsurface>
   </surfaces>
 
 </lccdd>

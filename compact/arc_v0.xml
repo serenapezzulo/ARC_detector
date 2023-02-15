@@ -15,10 +15,10 @@
 </includes>
 
 <display>
-  <vis name="vessel_vis"  r="236/256" g="237/256" b="232/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="vessel_vis"  r="236/256" g="237/256" b="232/256" alpha="0.9"  showDaughters="true" visible="true" />
   <vis name="gas_vis"     r="227/256" g="239/256" b="217/256" alpha="0.1"  showDaughters="true" visible="true" />
-  <vis name="aerogel_vis" r="244/256" g="177/256" b="132/256" alpha="0.1"  showDaughters="true" visible="true" />
-  <vis name="cooling_vis" r="254/256" g="230/256" b="151/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="aerogel_vis" r="244/256" g="177/256" b="132/256" alpha="0.5"  showDaughters="true" visible="true" />
+  <vis name="cooling_vis" r="254/256" g="230/256" b="151/256" alpha="0.5"  showDaughters="true" visible="true" />
   <vis name="sensor_vis"  r="255/256" g="0/256"   b="0/256"   alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="filter_vis"  r="0/256"   g="96/256"  b="156/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis"  r="255/256" g="230/256" b="153/256" alpha="1.0"  showDaughters="true" visible="true" />
@@ -26,16 +26,21 @@
 </display>
 
 <define>
-  <constant name="world_side"             value="30*m"      />
+  <constant name="world_side"             value="1*m"      />
   <constant name="world_x"                value="world_side"/>
   <constant name="world_y"                value="world_side"/>
-  <constant name="world_z"                value="100*m"     />
+  <constant name="world_z"                value="world_side"/>
   <constant name="CELL_X"                 value="27*cm"     />
   <constant name="CELL_Y"                 value="27*cm"     />
   <constant name="CELL_Z"                 value="20*cm"     />
   <constant name="CELL_WALL_THICKNESS"    value="1.0*cm"    />
   <constant name="SENSOR_THICKNESS"       value="0.2*cm"    />
   <constant name="SENSOR_X"               value="8.0*cm"    />
+  <constant name="SENSOR_Y"               value="8.0*cm"    />
+  <constant name="SENSOR_NStripsX"        value="100"       />
+  <constant name="SENSOR_NStripsY"        value="100"       />
+  <constant name="SENSOR_pitchX"          value="0.08*cm" />
+  <constant name="SENSOR_pitchY"          value="0.08*cm" />
   <constant name="SENSOR_Y"               value="8.0*cm"    />
   <constant name="MIRROR_THICKNESS"       value="0.2*cm"    />
   <constant name="MIRROR_RADIUS"          value="36.9*cm"   />
@@ -93,6 +98,7 @@
       vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
       radius="MIRROR_RADIUS"
+      surface="MirrorSurface"
       />
   </mirror>
 
@@ -100,7 +106,7 @@
   <aerogel>
     <!-- /detectors/detector/aerogel/module -->
     <module
-      material="Aluminum"
+      material="Aerogel_PFRICH"
       vis="aerogel_vis"
       thickness="AEROGEL_THICKNESS"
       />
@@ -110,7 +116,7 @@
   <cooling>
     <!-- /detectors/detector/cooling/module -->
     <module
-      material="Aluminum"
+      material="C4F10_PFRICH"
       vis="cooling_vis"
       thickness="COOLING_THICKNESS"
       />
@@ -120,11 +126,16 @@
   </detector>
 </detectors>
 
-
 <readouts>
   <readout name="ARC_HITS">
-    <id>system:8,module:12</id>
-  </readout>
+    <segmentation
+      type="CartesianGridXY"
+      grid_size_x="0.8*mm"
+      grid_size_y="0.8*mm"
+      offset_x="-0.5*(100-1)*0.8*mm"
+      offset_y="-0.5*(100-1)*0.8*mm"
+      />
+    <id>system:8,module:12,x:32:-16,y:-16</id>  </readout>
 </readouts>
 
 </lccdd>
