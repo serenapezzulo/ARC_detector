@@ -26,14 +26,14 @@
 </display>
 
 <define>
-  <constant name="world_side"             value="1*m"      />
+  <constant name="world_side"             value="10*m"      />
   <constant name="world_x"                value="world_side"/>
   <constant name="world_y"                value="world_side"/>
   <constant name="world_z"                value="world_side"/>
   <constant name="CELL_X"                 value="27*cm"     />
   <constant name="CELL_Y"                 value="27*cm"     />
   <constant name="CELL_Z"                 value="20*cm"     />
-  <constant name="CELL_WALL_THICKNESS"    value="1.0*cm"    />
+  <constant name="VESSEL_WALL_THICKNESS"  value="1.0*cm"    />
   <constant name="SENSOR_THICKNESS"       value="0.2*cm"    />
   <constant name="SENSOR_X"               value="8.0*cm"    />
   <constant name="SENSOR_Y"               value="8.0*cm"    />
@@ -51,22 +51,55 @@
 <detectors>
   <detector
     id="1"
-    name="ARC"
-    type="ARCBARRELTYPE"
-    gas="C4F10_PFRICH"
-    material="Aluminum"
-    vis_vessel="vessel_vis"
-    vis_gas="gas_vis"
+    name="ARCBARREL"
+    type="ARCBARREL_T"
+    gas_material="C4F10_PFRICH"
+    gas_vis="gas_vis"
+    vessel_material="Aluminum"
+    vessel_vis="vessel_vis"
     readout="ARC_HITS"
     >
-
+    <comment> 
+      The gas thickness = vessel_outer_r 
+                        - vessel_inner_r 
+                        - 2*vessel_wall_thickness
+    </comment>
     <dimensions
-      cell_x="CELL_X"
-      cell_y="CELL_Y"
-      cell_z="CELL_Z"
-      cell_wall_thickness="CELL_WALL_THICKNESS"
+      vessel_length="30*cm"
+      vessel_inner_r="10*cm"
+      vessel_outer_r="30*cm"
+      vessel_wall_thickness="VESSEL_WALL_THICKNESS"
       />
-
+  <!-- /detectors/detector/sensors -->
+  <sensors>
+    <!-- /detectors/detector/sensors/module -->
+    <comment>
+      ##### Sensor module
+      - dimensions:
+        - `side`:      side length of the square module
+        - `thickness`: thickness of the sensor module
+      - notes:
+        - the material is `SiliconAirOptical`, to resolve a technical issue with the refractive boundary
+    </comment>
+    <module
+      material="SiliconAirOptical"
+      vis="sensor_vis"
+      sensor_side_Z="SENSOR_Y"
+      sensor_side_Phi="SENSOR_X"
+      thickness="SENSOR_THICKNESS"
+      />
+  </sensors>
+  <!-- /detectors/detector/mirror -->
+  <mirror>
+    <!-- /detectors/detector/mirror/module -->
+    <module
+      material="Aluminum"
+      vis="mirror_vis"
+      thickness="MIRROR_THICKNESS"
+      radius="MIRROR_RADIUS"
+      surface="MirrorSurface"
+      />
+  </mirror>
   </detector>
 </detectors>
 
@@ -74,10 +107,10 @@
   <readout name="ARC_HITS">
     <segmentation
       type="CartesianGridXY"
-      grid_size_x="0.8*mm"
-      grid_size_y="0.8*mm"
-      offset_x="-0.5*(100-1)*0.8*mm"
-      offset_y="-0.5*(100-1)*0.8*mm"
+      grid_size_x="SENSOR_pitchX"
+      grid_size_y="SENSOR_pitchY"
+      offset_x="-0.5*(SENSOR_NStripsX-1)*SENSOR_pitchX"
+      offset_y="-0.5*(SENSOR_NStripsY-1)*SENSOR_pitchY"
       />
     <id>system:8,module:12,x:32:-16,y:-16</id>  </readout>
 </readouts>
