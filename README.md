@@ -34,6 +34,12 @@ To convert the geometry into ROOT
 ./myscripts/dd4hep2root -c  compact/arc_v0.xml -o arc_v0.root
 ```
 
+Using Geant4+Qt, particularly useful when using boolean operations and ROOT display do not work properly.
+
+```bash
+ddsim --compactFile compact/arc_barrel_v0.xml --runType qt --macroFile vis.mac --part.userParticleHandler=''
+```
+
 # Things to do after every change
 
 Compile and install after every modification of the c++ detector constructor code.

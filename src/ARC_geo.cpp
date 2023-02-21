@@ -146,6 +146,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   double vessel_inner_r = 190 * cm;
   double vessel_length = 440 * cm;
   double vessel_wall_thickness = 0.1 * cm;
+  double hexagon_side_length = 14.815*cm;
 
   if (vessel_outer_r <= vessel_inner_r)
     throw std::runtime_error("Ilegal parameters: vessel_outer_r <= vessel_inner_r");
@@ -162,10 +163,10 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   std::vector<double> rs(2);
   rs[0] = 0 * cm;
-  rs[1] = 14.815 * cm;
+  rs[1] = hexagon_side_length;
 
   // PolyhedraRegular cellS("aa",6,0,4*cm);
-  Polyhedra shape("aa", 6, 60 * deg, 360 * deg, zplanes, rs);
+  Polyhedra shape("aa", 6, 30 * deg, 360 * deg, zplanes, rs);
   Transform3D pyramidTr(RotationZYX(0, 90. * deg, 0. * deg), Translation3D(0, 0, 0));
 
   Solid cellS = IntersectionSolid(gasvolSolid, shape, pyramidTr);
@@ -206,19 +207,26 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     Volume mirrorVol(detName + "_mirror", mirrorSol, desc.material("Aluminum"));
     mirrorVol.setVisAttributes(desc.visAttributes("sensor_vis"));
     cellVol.placeVolume(mirrorVol, pyramidTr);
-    RotationZYX(0, 0, 0. * deg)
-
   }
 
   // place mother volume (vessel)
   Volume motherVol = desc.pickMotherVolume(det);
-  PlacedVolume vesselPV = motherVol.placeVolume(cellVol /*, Position(-1. * vessel_inner_r, 0 , 0)*/);
-  vesselPV.addPhysVolID("system", detID);
-  det.setPlacement(vesselPV);
+  double zstep = 2*hexagon_side_length;
+  for( int ringn = -8; ringn<=8; ++ ringn)
+  // for( int ringn = -1; ringn<=1; ++ ringn)
+  {
+    for (int phin = 0; phin < 27; ++phin)
+    {
+      PlacedVolume cellPV = motherVol.placeVolume(cellVol, RotationZ(13.333*phin*deg)*Translation3D(0,0,ringn*29.63*cm) );
+      cellPV.addPhysVolID("system", detID).addPhysVolID("module", 17*phin + ringn);
+      // create mirrors as separate detectors, so properties can be adjusted lated!
+      det.setPlacement(cellPV);
+    }
+  }
+
   return det;
 }
 DECLARE_DETELEMENT(ARCBARREL_T, create_barrel_cell)
-
 
 // create the detector
 static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
