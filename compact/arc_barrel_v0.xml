@@ -22,6 +22,24 @@
   <vis name="sensor_vis"  r="255/256" g="0/256"   b="0/256"   alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="filter_vis"  r="0/256"   g="96/256"  b="156/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis"  r="255/256" g="230/256" b="153/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis1"  r="128/256" g="230/256" b="153/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis2"  r="128/256" g="128/256" b="153/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis3"  r="128/256" g="128/256" b="256/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis4"  r="000/256" g="128/256" b="256/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis5"  r="000/256" g="000/256" b="256/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis6"  r="256/256" g="000/256" b="256/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis7"  r="256/256" g="128/256" b="256/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis8"  r="256/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis9"  r="256/256" g="128/256" b="000/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis10" r="128/256" g="256/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis11" r="128/256" g="256/256" b="000/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis12" r="000/256" g="256/256" b="000/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis13" r="000/256" g="256/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis14" r="000/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis15" r="000/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis16" r="000/256" g="128/256" b="055/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis17" r="000/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis18" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="no_vis" showDaughters="false" visible="false" />
 </display>
 
