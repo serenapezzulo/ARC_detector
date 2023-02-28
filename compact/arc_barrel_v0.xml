@@ -40,6 +40,9 @@
   <vis name="mirror_vis16" r="000/256" g="128/256" b="055/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis17" r="000/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis18" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis19" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis20" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
+  <vis name="mirror_vis21" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="no_vis" showDaughters="false" visible="false" />
 </display>
 
@@ -70,7 +73,7 @@
   <detector
     id="1"
     name="ARCBARREL"
-    type="ARCBARREL_T"
+    type="ARCENDCAP_T"
     gas_material="C4F10_PFRICH"
     gas_vis="gas_vis"
     vessel_material="Aluminum"
