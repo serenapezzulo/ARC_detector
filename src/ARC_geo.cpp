@@ -406,7 +406,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   /// the angle that one cell covers
   double phistep = 60 * deg;
   /// number of repetition of unique cells around the endcap
-  int phinmax = 6; // 27;
+  int phinmax = 6; // 6;
 
   // Mirror parameters
   double thickness_sphere(10 * mm);
@@ -427,8 +427,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   PolyhedraRegular cellS(6, 0, 0., hexagon_apothem, vessel_length);
 
   // Build sensor shape
-  // Box sensorSol(sensor_sidex/2, sensor_sidey/2, sensor_thickness/2);
-  // Volume sensorVol(detName + "_sensor", sensorSol, desc.material("Aluminum"));
+  Box sensorSol(sensor_sidex/2, sensor_sidey/2, sensor_thickness/2);
+  Volume sensorVol(detName + "_sensor", sensorSol, desc.material("Aluminum"));
 
   // Build the mirror for ncell=1..21
   // auto ncell = mycell_v[0];
@@ -436,31 +436,27 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   { 
     if( -1 == ncell.RID )
       continue;
-    for(int phin =0;phin<6; phin++)
+    // if( 5 != ncell.row )
+      // continue;
+    for(int phin =0;phin<phinmax; phin++)
     {  
     
     std::string volname = detName + "_cell" + std::to_string(ncell.RID);
     volname +="_phin" + std::to_string(phin);
     Volume cellV(volname, cellS, desc.material("C4F10_PFRICH"));
 
-
-        // cellV.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
-
     // The following line skips even number cells
-    // if (!(ncell % 2))
+    // if ( 1 != ncell.row )
     //   continue;
 
-    // The following line skips odd number cells
-    // if ((ncell % 2))
-    // continue;
 
     // // initialize parameters for creating the mirror
     double center_of_sphere_x(-999.);
     double center_of_sphere_z(-999.);
     double radius_of_sphere(-999.);
 
-    // double center_of_sensor_x(-999.);
-    // double angle_of_sensor(-999.);
+    double center_of_sensor_x(-999.);
+    double angle_of_sensor(-999.);
 
     // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
     int name_col = ncell.col;
@@ -474,8 +470,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       double zposition = cell_parameters_m.at("EndCapRadiator_c" + name_col_s + "_r" + name_row_s + "_ZPosition");
       center_of_sphere_z = mirror_z_origin_Martin + zposition;
 
-    //   center_of_sensor_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetPosition"];
-    //   angle_of_sensor = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetTilt"];
+      center_of_sensor_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetPosition"];
+      angle_of_sensor = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetTilt"];
 
       // check if parameters are ok
       if ( -999. == center_of_sphere_x)
@@ -487,19 +483,12 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       if (radius_of_sphere <= thickness_sphere)
         throw std::runtime_error(Form("Ilegal parameters cell %d: %g <= %g", ncell.RID,radius_of_sphere, thickness_sphere ));
 
-    //   if ( -999. == center_of_sensor_x)
-    //     throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
-    //   if ( -999. == angle_of_sensor)
-    //     throw std::runtime_error("Ilegal parameters: angle_of_sensor not provided");
+      if ( -999. == center_of_sensor_x)
+        throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
+      if ( -999. == angle_of_sensor)
+        throw std::runtime_error("Ilegal parameters: angle_of_sensor not provided");
 
     }
-
-    // if (reflect_parameters)
-    // {
-    //   center_of_sphere_x *= -1.0;
-    //   center_of_sensor_x *= -1.0;
-    //   angle_of_sensor *= -1.0;
-    // }
 
     // create the semi-sphere that will result in the mirror
     Sphere mirrorShapeFull(radius_of_sphere - thickness_sphere,
@@ -516,16 +505,19 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     
     Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(dx, dy, center_of_sphere_z));
 
-    // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
-    /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
+    /// Define the actual mirror as intersection of the hex cell volume and the hollow sphere just defined
     Solid mirrorSol = IntersectionSolid(cellS, mirrorShapeFull, mirrorTr);
-    Volume mirrorVol(detName + "_mirror" + std::to_string(ncell.RID) + "z" + std::to_string(ncell.isReflected), mirrorSol, desc.material("Aluminum"));
+    std::string mirrorVolName = detName + "_mirror" 
+                                + std::to_string(ncell.RID) 
+                                + "z" + std::to_string(ncell.isReflected);
+    Volume mirrorVol( mirrorVolName , mirrorSol, desc.material("Aluminum"));
     mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
     cellV.placeVolume(mirrorVol);
 
     // // Place detector in cell
-    // Transform3D sensorTr(RotationZYX(0, 90*deg-angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin, 0, center_of_sensor_x));
-    // cellVol.placeVolume(sensorVol, sensorTr);
+    Transform3D sensorTr(RotationZYX( alpha - 90*deg, 0/*90*deg-angle_of_sensor*/, angle_of_sensor /*ncell.row*20*deg*/ ), 
+            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
+    cellV.placeVolume(sensorVol, sensorTr);
 
     // // position of mirror in cylinder coordinate system
     // double mirror_abs_pos_z = name_col * zstep - 0.5 * zstep * (2 == name_row);
@@ -561,6 +553,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       Volume mirrorVol_reflected(mirror_name, mirrorSol_reflected, desc.material("Aluminum"));
       mirrorVol_reflected.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
       cellV_reflected.placeVolume(mirrorVol_reflected);
+    Transform3D sensorTr_reflected(RotationZYX( -alpha + 90*deg, 0/*90*deg-angle_of_sensor*/, angle_of_sensor), 
+            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
+    cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
+
       motherVol.placeVolume(cellV_reflected, RotationZ(phistep * phin ) * Translation3D(-ncell.x, ncell.y, 0));
     }
   } //-- end loop for sector
