@@ -72,8 +72,8 @@
 <detectors>
   <detector
     id="1"
-    name="ARCBARREL"
-    type="ARCBARREL_T"
+    name="ARCENDCAP"
+    type="ARCENDCAP_T"
     gas_material="C4F10_PFRICH"
     gas_vis="gas_vis"
     vessel_material="Aluminum"
