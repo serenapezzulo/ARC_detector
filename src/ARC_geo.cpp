@@ -38,11 +38,11 @@ namespace
   std::map<std::string, double> cell_parameters_m;
 
   /// tokenize string by space as delimiter
-  void mytokenizer(std::string &istring, std::vector<std::string> &tokens)
+  void mytokenizer(std::string &istring, std::vector<std::string> &tokens, char delimiter = ' ')
   {
     std::stringstream myline_ss(istring);
     std::string intermediate;
-    while (getline(myline_ss, intermediate, ' '))
+    while (getline(myline_ss, intermediate, delimiter))
       tokens.push_back(intermediate);
   }
 
@@ -50,9 +50,10 @@ namespace
   void fill_cell_parameters_m()
   {
     // avoid calling this function twice
-    if (cell_parameters_m.size())
+    if ( not cell_parameters_m.empty() )
       return;
 
+    // Read Martins File
     // hardcoded, to be developed later
     std::ifstream ifile("RadiatorCell_FinaOptimisation.txt");
 
@@ -81,7 +82,8 @@ namespace
         continue;
 
       std::string &parname = tokens.at(0);
-      cell_parameters_m[parname] = atof(tokens[1].c_str());
+      double parvalue = atof(tokens[1].c_str());
+      cell_parameters_m.emplace( parname, parvalue );
 
       // increase corresponding parameter counter
       // and calibrate parameter according to Martin units
