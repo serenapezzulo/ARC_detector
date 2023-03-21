@@ -540,13 +540,14 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
         auto cellTr = RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z);
         gasVol.placeVolume(mirrorVol, cellTr*pyramidTr);
         PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, cellTr*sensorTr);
-        sensorPV.addPhysVolID("barrel", sensorcounter++ );
-        // sensorPV.addPhysVolID("barrel", 1);
+        sensorPV.addPhysVolID("phin", phin );
+        sensorPV.addPhysVolID("cellrow", name_row );
+        sensorPV.addPhysVolID("cellcolumn", name_col );
+        
+        // sensorPV.addPhysVolID("uniquecellid", ncell );
         // sensorPV.addPhysVolID("side", reflect_parameters?  0 : 1);
-        // // sensorPV.addPhysVolID("sector", phin); //sector:5,
-        // // sensorPV.addPhysVolID("uniquecell", ncell); // uniquecell:5,
-        // sensorPV.addPhysVolID("isreflected", reflect_parameters);
 
+        std::cout << sensorPV.volIDs().str() << std::endl;
 
 
         
@@ -567,123 +568,9 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   Volume motherVol = desc.pickMotherVolume(det);
   PlacedVolume vesselPV = motherVol.placeVolume( vesselVol );
   vesselPV.addPhysVolID("system", detID);
+  vesselPV.addPhysVolID("barrel", 0);
   // create mirrors as separate detectors, so properties can be adjusted lated!
   det.setPlacement(vesselPV);
-  return det;
-
-
-
-
-
-  // for (auto ncell : ncell_vector)
-  // {
-  //   // // The following line skips even number cells
-  //   // // if (!(ncell % 2))
-  //   // //   continue;
-
-  //   // // The following line skips odd number cells
-  //   // // if ((ncell % 2))
-  //   // // continue;
-
-  //   // /// cell shape. Coordinate system still the same as cylinder!
-  //   // Solid cellS = IntersectionSolid(gasvolSolid, shape, pyramidTr);
-  //   // Volume cellVol(detName + "_cell" + std::to_string(ncell), cellS, desc.material("C4F10_PFRICH"));
-  //   // cellVol.setVisAttributes(desc.visAttributes("gas_vis"));
-
-  //   // // there is no cell number 0, and cell number 1 do not need to be reflected
-  //   // if (0 == ncell || -1 == ncell)
-  //   //   continue;
-
-  //   // // cells at z
-  //   // bool reflect_parameters = false;
-  //   // if (0 > ncell)
-  //   // {
-  //   //   ncell *= -1;
-  //   //   reflect_parameters = true;
-  //   // }
-
-  //   // // initialize parameters for creating the mirror
-  //   // double center_of_sphere_x(-999.);
-  //   // double center_of_sphere_z(-999.);
-  //   // double radius_of_sphere(-999.);
-
-  //   // double center_of_sensor_x(-999.);
-  //   // double angle_of_sensor(-999.);
-
-  //   // // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
-  //   // int name_col = ncell / 2;
-  //   // int name_row = ncell % 2 ? 1 : 2;
-  //   // // retrieve stored parameters
-  //   // {
-  //   //   std::string name_col_s = std::to_string(name_col);
-  //   //   std::string name_row_s = std::to_string(name_row);
-  //   //   radius_of_sphere = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_Curvature"];
-  //   //   center_of_sphere_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_XPosition"];
-  //   //   double zposition = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_ZPosition"];
-
-  //   //   center_of_sensor_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetPosition"];
-  //   //   angle_of_sensor = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetTilt"];
-  //   //   center_of_sphere_z = mirror_z_origin_Martin + zposition;
-
-  //   //   // check if parameters are ok
-  //   //   if (-999. == center_of_sphere_x)
-  //   //     throw std::runtime_error("Ilegal parameters: center_of_sphere_x not provided");
-  //   //   if (-999. == center_of_sphere_z)
-  //   //     throw std::runtime_error("Ilegal parameters: center_of_sphere_z not provided");
-  //   //   if (-999. == radius_of_sphere)
-  //   //     throw std::runtime_error("Ilegal parameters: radius_of_sphere not provided");
-  //   //   if (radius_of_sphere <= thickness_sphere)
-  //   //     throw std::runtime_error("Ilegal parameters: radius_of_sphere <= thickness_sphere");
-
-  //   //   if (-999. == center_of_sensor_x)
-  //   //     throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
-  //   //   if (-999. == angle_of_sensor)
-  //   //     throw std::runtime_error("Ilegal parameters: angle_of_sensor not provided");
-  //   // }
-
-  //   // if (reflect_parameters)
-  //   // {
-  //   //   center_of_sphere_x *= -1.0;
-  //   //   center_of_sensor_x *= -1.0;
-  //   //   angle_of_sensor *= -1.0;
-  //   // }
-
-  //   // create the semi-sphere that will result in the mirror
-  //   Sphere mirrorShapeFull(radius_of_sphere - thickness_sphere,
-  //                          radius_of_sphere,
-  //                          0.,
-  //                          3.14 / 2);
-  //   /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
-  //   Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z));
-
-  //   // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
-  //   /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
-  //   Solid mirrorSol = IntersectionSolid(shape, mirrorShapeFull, mirrorTr);
-  //   Volume mirrorVol(detName + "_mirror" + std::to_string(ncell) + "z" + std::to_string(reflect_parameters), mirrorSol, desc.material("Aluminum"));
-  //   mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell)));
-  //   cellVol.placeVolume(mirrorVol, pyramidTr);
-
-  //   // Place detector in cell
-  //   Transform3D sensorTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin, 0, center_of_sensor_x));
-  //   cellVol.placeVolume(sensorVol, sensorTr);
-
-  //   // position of mirror in cylinder coordinate system
-  //   double mirror_abs_pos_z = name_col * zstep - 0.5 * zstep * (2 == name_row);
-  //   if (reflect_parameters)
-  //     mirror_abs_pos_z *= -1.0;
-
-  //   // row 2 is shifted half step size
-  //   double phi_offset = 0 + 0.5 * phistep * (2 == name_row);
-
-  //   for (int phin = 0; phin < phinmax; ++phin)
-  //   {
-  //     PlacedVolume cellPV = motherVol.placeVolume(cellVol, RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z));
-  //     cellPV.addPhysVolID("system", detID).addPhysVolID("module", 17 * phin + name_col);
-  //     // create mirrors as separate detectors, so properties can be adjusted lated!
-  //     det.setPlacement(cellPV);
-  //   }
-  // }
-
   return det;
 }
 

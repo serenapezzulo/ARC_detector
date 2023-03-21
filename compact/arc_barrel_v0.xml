@@ -133,7 +133,7 @@
       offset_x="-0.5*(SENSOR_NStripsX-1)*SENSOR_pitchX"
       offset_y="-0.5*(SENSOR_NStripsY-1)*SENSOR_pitchY"
       />
-    <id>system:8,module:12,x:32:-16,y:-16</id>  </readout>
-</readouts>
+      <id>system:8,barrel:3,phin:5,cellrow:8,cellcolumn:8,x:32:-16,y:-16</id>
+      </readouts>
 
 </lccdd>
