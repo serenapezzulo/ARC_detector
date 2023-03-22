@@ -116,7 +116,7 @@
   <cooling>
     <!-- /detectors/detector/cooling/module -->
     <module
-      material="C4F10_PFRICH"
+      material="Aluminum"
       vis="cooling_vis"
       thickness="COOLING_THICKNESS"
       />
