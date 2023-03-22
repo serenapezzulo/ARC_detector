@@ -371,13 +371,14 @@
       <property name="RINDEX"    ref="RINDEX__Acrylic_PFRICH"/>
       <property name="ABSLENGTH" ref="ABSLENGTH__Acrylic_PFRICH"/>
     </material>
-  </materials>
     <material name="CarbonFibStr">
       <D type="density" value="1.45" unit="g/cm3"/>
       <comment> CMS ECAL https://gitlab.cern.ch/geant4/geant4/-/blob/master/examples/advanced/composite_calorimeter/dataglobal/material.cms#L183 </comment>
       <composite n="2"   ref="C"/>
       <composite n="13"  ref="H"/>
     </material>
+  </materials>
+
   <surfaces>
     <opticalsurface name="SensorSurface_PFRICH" model="glisur" finish="polished" type="dielectric_dielectric">
       <property name="EFFICIENCY" coldim="2" values="
