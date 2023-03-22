@@ -313,7 +313,8 @@
     <material name="SiliconOptical">
       <D type="density" value="2.3" unit="g/cm3"/>
       <composite n="1"  ref="Si"/>
-      <property name="RINDEX" ref="RINDEX__Vacuum"/>
+      <property name="RINDEX"    coldim="2" values="1*eV  1.0000  5*eV  1.0000"/>
+      <property name="ABSLENGTH" coldim="2" values="1*eV  0.1*mm  5*eV  0.1*mm"/>
     </material>
     <material name="Vacuum">
       <D type="density" unit="g/cm3" value="0.0000000001"/>
