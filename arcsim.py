@@ -43,6 +43,7 @@ if __name__ == "__main__":
         ph = PhysicsList(kernel, "Geant4OpticalPhotonPhysics/OpticalGammaPhys")
         ph.addParticleConstructor("G4OpticalPhoton")
         ph.VerboseLevel = 0
+        ph.BoundaryInvokeSD = True
         ph.enableUI()
         seq.adopt(ph)
         return None
@@ -57,10 +58,10 @@ if __name__ == "__main__":
         name="ParticleSelectFilter/OpticalPhotonSelector",
         parameter={"particle": "opticalphoton"},
         )
-    SIM.filter.mapDetFilter["ARCTYPE"] = "opticalphotons"
+    SIM.filter.mapDetFilter["ARC_DETECTORNAME"] = "opticalphotons"
 
     # Use the optical tracker for the PFRICH
-    SIM.action.mapActions["ARCTYPE"] = "Geant4OpticalTrackerAction"
+    SIM.action.mapActions["ARC_DETECTORNAME"] = "Geant4OpticalTrackerAction"
 
     # Disable user tracker particle handler, so hits can be associated to photons
     SIM.part.userParticleHandler = ""
