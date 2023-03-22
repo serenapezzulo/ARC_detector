@@ -51,7 +51,7 @@
 <detectors>
   <detector
     id="1"
-    name="ARC"
+    name="ARC_DETECTORNAME"
     type="ARCTYPE"
     gas="C4F10_PFRICH"
     material="Aluminum"
@@ -81,7 +81,7 @@
         - the material is `AirOptical`, to resolve a technical issue with the refractive boundary
     </comment>
     <module
-      material="AirOptical"
+      material="SiliconOptical"
       surface="SensorSurface_PFRICH"
       vis="sensor_vis"
       sensorX="SENSOR_X"
