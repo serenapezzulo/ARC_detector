@@ -50,7 +50,7 @@ namespace
   void fill_cell_parameters_m()
   {
     // avoid calling this function twice
-    if ( not cell_parameters_m.empty() )
+    if (not cell_parameters_m.empty())
       return;
 
     // Read Martins File
@@ -83,7 +83,7 @@ namespace
 
       std::string &parname = tokens.at(0);
       double parvalue = atof(tokens[1].c_str());
-      cell_parameters_m.emplace( parname, parvalue );
+      cell_parameters_m.emplace(parname, parvalue);
 
       // increase corresponding parameter counter
       // and calibrate parameter according to Martin units
@@ -342,11 +342,12 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   std::string detName = detElem.nameStr();
   int detID = detElem.id();
   xml::Component dims = detElem.dimensions();
-  OpticalSurfaceManager surfMgr = desc.surfaceManager();
   DetElement det(detName, detID);
-  sens.setType("tracker"); 
-
-  auto sensorSurf = surfMgr.opticalSurface( "MirrorSurface");
+  sens.setType("tracker");
+  // Move to begining of detector constructor?
+  OpticalSurfaceManager surfMgr = desc.surfaceManager();
+  auto sensorSurf = surfMgr.opticalSurface("SensorSurface_PFRICH");
+  auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
 
   // Vessel, cylindral
   double vessel_outer_r = 210 * cm;
@@ -381,7 +382,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   double sensor_sidey = 8 * cm;
   double sensor_thickness = 0.2 * cm;
   double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + 0.5 * cooling_radial_thickness;
-  
+
   // read Martin file and store parameters by name in the map
   fill_cell_parameters_m();
 
@@ -390,33 +391,33 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
    * - `gasvol`: gas volume, which fills `vessel`; all other volumes defined below
    *   as children of `gasvol`. Sensor is placed inside Cooling.
    * vessel (cylind) -> Gasvol (cylind) -> Cooling (cylind) -> Sensor CCD (cylind)
-   *                                 \-> Mirror (sphere intersection with cell volume)
-   *                                 \-> Aerogel (cylind)
+   *                                   \-> Mirror (sphere intersection with cell volume)
+   *                                   \-> Aerogel (cylind)
    */
   // Build cylinder vol for vessel.
   Tube vesselSolid(vessel_inner_r,
                    vessel_outer_r,
-                   vessel_length/2.);
+                   vessel_length / 2.);
   Volume vesselVol(detName + "_vessel", vesselSolid, desc.material("Aluminum"));
-  vesselVol.setVisAttributes(desc.visAttributes( "gas_vis")); 
+  vesselVol.setVisAttributes(desc.visAttributes("gas_vis"));
 
   // Build cylinder vol for gas. It is placed inside vessel
   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
                    vessel_outer_r - vessel_wall_thickness,
-                   vessel_length/2.);
+                   vessel_length / 2.);
   Volume gasVol(detName + "_gas", gasvolSolid, desc.material("C4F10_PFRICH"));
   gasVol.setVisAttributes(desc.visAttributes("gas_vis"));
 
   // Build cylinder vol for cooling.It is placed inside gas
   Tube coolinSolid(vessel_inner_r + vessel_wall_thickness,
                    vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness,
-                   vessel_length/2.);
+                   vessel_length / 2.);
   Volume coolingVol(detName + "_cooling", coolinSolid, desc.material("Copper"));
   coolingVol.setVisAttributes(desc.visAttributes("gas_vis"));
 
   //----->> Place mirrors and sensors
   {
-    
+
     // Use pyramid for barrel cells
     std::vector<double> zplanes = {0 * cm, vessel_outer_r - vessel_wall_thickness};
     std::vector<double> rs = {0 * cm, hexagon_apothem};
@@ -434,11 +435,13 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
 
     // Build the mirror for ncell=1..18
     std::vector<int> ncell_vector = {-2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18,
-                                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
+                                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
     // std::vector<int> ncell_vector = { /*-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13, -14,-15,-16,-17,-18,*/
     //                                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
     //                                 };
     // ncell_vector = {1};
+
+    /// Dummy counter to place elements inside the barrel
     int sensorcounter(0);
     for (auto ncell : ncell_vector)
     {
@@ -509,9 +512,9 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
 
       // create the semi-sphere that will result in the mirror
       Sphere mirrorShapeFull(radius_of_sphere - thickness_sphere,
-                            radius_of_sphere,
-                            0.,
-                            3.14 / 2);
+                             radius_of_sphere,
+                             0.,
+                             3.14 / 2);
       /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
       Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z));
 
@@ -538,35 +541,38 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
       for (int phin = 0; phin < phinmax; ++phin)
       {
         auto cellTr = RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z);
-        gasVol.placeVolume(mirrorVol, cellTr*pyramidTr);
-        PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, cellTr*sensorTr);
-        sensorPV.addPhysVolID("phin", phin );
-        sensorPV.addPhysVolID("cellrow", name_row );
-        sensorPV.addPhysVolID("cellcolumn", name_col );
-        
+        PlacedVolume mirrorPV = gasVol.placeVolume(mirrorVol, cellTr * pyramidTr);
+        PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, cellTr * sensorTr);
+        // sensorPV.addPhysVolID("phin", phin );
+        // sensorPV.addPhysVolID("cellrow", name_row );
+        // sensorPV.addPhysVolID("cellcolumn", name_col );
+
         // sensorPV.addPhysVolID("uniquecellid", ncell );
         // sensorPV.addPhysVolID("side", reflect_parameters?  0 : 1);
+        sensorPV.addPhysVolID("cellnumber", 2*sensorcounter);
 
         std::cout << sensorPV.volIDs().str() << std::endl;
 
-
-        
         // create mirrors as separate detectors, so properties can be adjusted later!
-      }
+        DetElement mirrorDE(det, Form("ARC_DEmirror%d", sensorcounter), 2 * sensorcounter +1);
+        mirrorDE.setPlacement(mirrorPV);
+        SkinSurface mirrorSkin(desc, mirrorDE, Form("mirror_optical_surface%d", sensorcounter), mirrorSurf, mirrorVol); // FIXME: 3rd arg needs `imod`?
+        mirrorSkin.isValid();
 
+        // increase counter
+        sensorcounter++;
+      }
 
     } //---> End for loop over cell number vector
 
-
   } //---- End placing mirrors and sensors
 
-
-  gasVol.placeVolume( coolingVol );
-  vesselVol.placeVolume( gasVol );
+  gasVol.placeVolume(coolingVol);
+  vesselVol.placeVolume(gasVol);
   // place vessel in mother volume
   // mother volume corresponds to the world
   Volume motherVol = desc.pickMotherVolume(det);
-  PlacedVolume vesselPV = motherVol.placeVolume( vesselVol );
+  PlacedVolume vesselPV = motherVol.placeVolume(vesselVol);
   vesselPV.addPhysVolID("system", detID);
   vesselPV.addPhysVolID("barrel", 0);
   // create mirrors as separate detectors, so properties can be adjusted lated!
