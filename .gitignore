@@ -3,3 +3,5 @@ install
 *.root
 *.pdf
 .vscode
+kk*
+*.kdev4
