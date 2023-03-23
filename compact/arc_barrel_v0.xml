@@ -134,6 +134,7 @@
       offset_y="-0.5*(SENSOR_NStripsY-1)*SENSOR_pitchY"
       />
       <id>system:8,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
-      </readouts>
+  </readout>
+</readouts>
 
 </lccdd>
