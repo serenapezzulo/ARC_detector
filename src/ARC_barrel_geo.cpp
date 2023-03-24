@@ -281,8 +281,8 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   Tube vesselSolid(vessel_inner_r,
                    vessel_outer_r,
                    vessel_length / 2.);
-  Volume vesselVol(detName + "_vessel", vesselSolid, desc.material("Aluminum"));
-  vesselVol.setVisAttributes(desc.visAttributes("gas_vis"));
+  Volume vesselVol(detName + "_vessel", vesselSolid, desc.material("CarbonFibStr"));
+  vesselVol.setVisAttributes(desc.visAttributes("vessel_vis"));
 
   // Build cylinder vol for gas. It is placed inside vessel
   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
@@ -296,7 +296,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
                    vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness,
                    vessel_length / 2.);
   Volume coolingVol(detName + "_cooling", coolinSolid, desc.material("Copper"));
-  coolingVol.setVisAttributes(desc.visAttributes("gas_vis"));
+  coolingVol.setVisAttributes(desc.visAttributes("cooling_vis"));
 
   //----->> Place mirrors and sensors
   {
