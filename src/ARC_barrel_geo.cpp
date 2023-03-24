@@ -68,17 +68,19 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   /// the angle that one cell covers
   double phistep = 13.333 * deg;
   /// number of repetition of unique cells around the barrel
-  int phinmax = 27; // 27;
+  int phinmax = 1; // 27;
 
   // Mirror parameters
   double thickness_sphere(10 * mm);
-  double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm;
+  double mirror_diameter_safe_shrink = 1*mm;
+  double mirror_z_safe_shrink = 1*mm;
+  double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm - mirror_z_safe_shrink;
 
   // Light sensor parameters
   double sensor_sidex = 8 * cm;
   double sensor_sidey = 8 * cm;
   double sensor_thickness = 0.2 * cm;
-  double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + 0.5 * cooling_radial_thickness;
+  double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness;
 
   // Build cylinder for gas.
   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
@@ -89,8 +91,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // PolyhedraRegular cellS("aa",6,0,4*cm);
 
   // Use pyramid for barrel cells
-  std::vector<double> zplanes = {0 * cm, vessel_outer_r - vessel_wall_thickness};
-  std::vector<double> rs = {0 * cm, hexagon_side_length};
+  std::vector<double> zplanes = {0 * cm, vessel_outer_r - vessel_wall_thickness - mirror_z_safe_shrink};
+  std::vector<double> rs = {0 * cm, hexagon_side_length - mirror_diameter_safe_shrink};
   /// Hexagonal pyramid
   Polyhedra shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
   /// rotation of 90deg around Y axis, to align Z axis of pyramid with X axis of cylinder
@@ -106,7 +108,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // std::vector<int> ncell_vector = { /*-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13, -14,-15,-16,-17,-18,*/
   //                                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
   //                                 };
-  // ncell_vector = {1};
+  ncell_vector = {7};
   for (auto ncell : ncell_vector)
   {
     // The following line skips even number cells
@@ -186,7 +188,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                            0.,
                            3.14 / 2);
     /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
-    Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z));
+    Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z - mirror_z_safe_shrink));
 
     // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
     /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
@@ -254,17 +256,20 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   /// the angle that one cell covers
   double phistep = 13.333 * deg;
   /// number of repetition of unique cells around the barrel
-  int phinmax = 27; // 27;
+  int phinmax = 1; // 27;
 
   // Mirror parameters
-  double thickness_sphere(10 * mm);
+  double thickness_sphere(1 * mm);
+  double mirror_diameter_safe_shrink = 1*mm;
+  double mirror_z_safe_shrink = 2.6*mm;
   double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm;
 
   // Light sensor parameters
   double sensor_sidex = 8 * cm;
   double sensor_sidey = 8 * cm;
   double sensor_thickness = 0.2 * cm;
-  double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + 0.5 * cooling_radial_thickness;
+  double sensor_z_safe_shrink = 1.5*mm;
+  double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness + sensor_z_safe_shrink;
 
   // read Martin file and store parameters by name in the map
   fill_cell_parameters_m();
@@ -290,19 +295,20 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
                    vessel_length / 2.);
   Volume gasVol(detName + "_gas", gasvolSolid, desc.material("C4F10_PFRICH"));
   gasVol.setVisAttributes(desc.visAttributes("gas_vis"));
-
+#ifdef __CREATE_COOLING__
   // Build cylinder vol for cooling.It is placed inside gas
   Tube coolinSolid(vessel_inner_r + vessel_wall_thickness,
                    vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness,
                    vessel_length / 2.);
   Volume coolingVol(detName + "_cooling", coolinSolid, desc.material("Copper"));
   coolingVol.setVisAttributes(desc.visAttributes("cooling_vis"));
+#endif
 
   //----->> Place mirrors and sensors
   {
 
     // Use pyramid for barrel cells
-    std::vector<double> zplanes = {0 * cm, vessel_outer_r - vessel_wall_thickness};
+    std::vector<double> zplanes = {0 * cm, vessel_outer_r - vessel_wall_thickness - mirror_z_safe_shrink};
     std::vector<double> rs = {0 * cm, hexagon_apothem};
     /// Hexagonal pyramid
     Polyhedra shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
@@ -322,7 +328,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
     // std::vector<int> ncell_vector = { /*-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13, -14,-15,-16,-17,-18,*/
     //                                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
     //                                 };
-    ncell_vector = {1};
+    ncell_vector = {17};
 
     /// Dummy counter to place elements inside the barrel
     int sensorcounter(0);
@@ -397,9 +403,9 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
       Sphere mirrorShapeFull(radius_of_sphere - thickness_sphere,
                              radius_of_sphere,
                              0.,
-                             3.14 / 2);
+                             3.14 / 2.6);
       /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
-      Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z));
+      Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z- mirror_z_safe_shrink));
 
       // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
       /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
@@ -425,7 +431,11 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
       {
         auto cellTr = RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z);
         PlacedVolume mirrorPV = gasVol.placeVolume(mirrorVol, cellTr * pyramidTr);
+#ifdef __CREATE_COOLING__
         PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, cellTr * sensorTr);
+#else
+        PlacedVolume sensorPV = gasVol.placeVolume(sensorVol, cellTr * sensorTr);
+#endif
         // sensorPV.addPhysVolID("phin", phin );
         // sensorPV.addPhysVolID("cellrow", name_row );
         // sensorPV.addPhysVolID("cellcolumn", name_col );
@@ -449,8 +459,9 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
     } //---> End for loop over cell number vector
 
   } //---- End placing mirrors and sensors
-
+#ifdef __CREATE_COOLING__
   gasVol.placeVolume(coolingVol);
+#endif
   vesselVol.placeVolume(gasVol);
   // place vessel in mother volume
   // mother volume corresponds to the world
