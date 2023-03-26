@@ -260,8 +260,8 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
 
   // Mirror parameters
   double thickness_sphere(1 * mm);
-  double mirror_diameter_safe_shrink = 1*mm;
-  double mirror_z_safe_shrink = 2.6*mm;
+//   double mirror_diameter_safe_shrink = 0*mm;
+//   double mirror_z_safe_shrink = 0*mm;
   double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm;
 
   // Light sensor parameters
@@ -308,8 +308,11 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   {
 
     // Use pyramid for barrel cells
-    std::vector<double> zplanes = {0 * cm, vessel_outer_r - vessel_wall_thickness - mirror_z_safe_shrink};
-    std::vector<double> rs = {0 * cm, hexagon_apothem};
+    double pyramid_height = vessel_outer_r - vessel_wall_thickness /*- mirror_z_safe_shrink*/;
+    double pyramid_base_apothem = hexagon_apothem;
+    double myfactor = cos( phistep /2 );
+    std::vector<double> zplanes = {0 * cm, pyramid_height*myfactor };
+    std::vector<double> rs = {0 * cm, pyramid_base_apothem*myfactor };
     /// Hexagonal pyramid
     Polyhedra shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
     /// rotation of 90deg around Y axis, to align Z axis of pyramid with X axis of cylinder
@@ -405,7 +408,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
                              0.,
                              3.14 / 2.6);
       /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
-      Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z- mirror_z_safe_shrink));
+      Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x , 0, center_of_sphere_z /*- mirror_z_safe_shrink*/));
 
       // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
       /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
