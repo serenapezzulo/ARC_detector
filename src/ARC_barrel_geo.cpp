@@ -320,7 +320,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
 
     // Build sensor shape
     Box sensorSol(sensor_sidex / 2, sensor_sidey / 2, sensor_thickness / 2);
-    Volume sensorVol(detName + "_sensor", sensorSol, desc.material("AirOptical"));
+    Volume sensorVol(detName + "_sensor", sensorSol, desc.material("SiliconOptical"));
     sensorVol.setSensitiveDetector(sens);
     SkinSurface sensorSkin(desc, det, "sensor_optical_surface", sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
     sensorSkin.isValid();
