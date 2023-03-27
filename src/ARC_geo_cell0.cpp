@@ -132,10 +132,10 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
       sensorPV.addPhysVolID("module", 127);
 
       // // Make sensor sensitive + define optical properties
-      // DetElement sensorDE(aerogelDE, "ARC_sensor", 127);
-      // sensorDE.setPlacement(sensorPV);
-      // SkinSurface sensorSkin(desc, sensorDE, "sensor_optical_surface", sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
-      // sensorSkin.isValid();
+      DetElement sensorDE(det, "ARC_sensor", 127);
+      sensorDE.setPlacement(sensorPV);
+      SkinSurface sensorSkin(desc, sensorDE, "sensor_optical_surface", sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
+      sensorSkin.isValid();
     }
   }
   ///----------->>> Aerogel (+sensor)
