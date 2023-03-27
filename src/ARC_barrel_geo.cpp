@@ -449,6 +449,12 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
 
         std::cout << sensorPV.volIDs().str() << std::endl;
 
+        // // Make sensor sensitive + define optical properties
+        DetElement sensorDE(det, Form("ARC_DEsensor%d", sensorcounter), 2 * sensorcounter );
+        sensorDE.setPlacement(sensorPV);
+        SkinSurface sensorSkin(desc, sensorDE, Form("sensor_optical_surface%d", sensorcounter), sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
+        sensorSkin.isValid();
+
         // create mirrors as separate detectors, so properties can be adjusted later!
         DetElement mirrorDE(det, Form("ARC_DEmirror%d", sensorcounter), 2 * sensorcounter +1);
         mirrorDE.setPlacement(mirrorPV);
