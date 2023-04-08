@@ -68,7 +68,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   /// the angle that one cell covers
   double phistep = 13.333 * deg;
   /// number of repetition of unique cells around the barrel
-  int phinmax = 1; // 27;
+  int phinmax = 27; // 27;
 
   // Mirror parameters
   double thickness_sphere(10 * mm);
@@ -109,7 +109,9 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // std::vector<int> ncell_vector = { /*-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13, -14,-15,-16,-17,-18,*/
   //                                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
   //                                 };
-  ncell_vector = {7};
+//   ncell_vector = {7};
+  ncell_vector = {-2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16,
+                                   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
   for (auto ncell : ncell_vector)
   {
     // The following line skips even number cells
