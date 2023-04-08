@@ -91,9 +91,10 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // PolyhedraRegular cellS("aa",6,0,4*cm);
 
   // Use pyramid for barrel cells
-  std::vector<double> zplanes = {0 * cm, vessel_outer_r - vessel_wall_thickness - mirror_z_safe_shrink};
-  std::vector<double> rs = {0 * cm, hexagon_side_length - mirror_diameter_safe_shrink};
-  /// Hexagonal pyramid
+  double angle_hex = atan( hexagon_side_length / vessel_outer_r );
+  std::vector<double> zplanes = { vessel_inner_r, vessel_outer_r*cos(angle_hex) };
+  std::vector<double> rs = { 0.89*hexagon_side_length, 0.96*hexagon_side_length };
+    /// Hexagonal pyramid
   Polyhedra shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
   /// rotation of 90deg around Y axis, to align Z axis of pyramid with X axis of cylinder
   Transform3D pyramidTr(RotationZYX(0, -90. * deg, 0. * deg), Translation3D(0, 0, 0));
@@ -119,9 +120,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // if ((ncell % 2))
     // continue;
 
-    /// cell shape. Coordinate system still the same as cylinder!
-    Solid cellS = IntersectionSolid(gasvolSolid, shape, pyramidTr);
-    Volume cellVol(detName + "_cell" + std::to_string(ncell), cellS, desc.material("C4F10_PFRICH"));
+    Volume cellVol(detName + "_cell" + std::to_string(ncell), shape, desc.material("C4F10_PFRICH"));
     cellVol.setVisAttributes(desc.visAttributes("gas_vis"));
 
     // there is no cell number 0, and cell number 1 do not need to be reflected
@@ -195,11 +194,13 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     Solid mirrorSol = IntersectionSolid(shape, mirrorShapeFull, mirrorTr);
     Volume mirrorVol(detName + "_mirror" + std::to_string(ncell) + "z" + std::to_string(reflect_parameters), mirrorSol, desc.material("Aluminum"));
     mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell)));
-    cellVol.placeVolume(mirrorVol, pyramidTr);
+    cellVol.placeVolume(mirrorVol);
+
+
 
     // Place detector in cell
     Transform3D sensorTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin, 0, center_of_sensor_x));
-    cellVol.placeVolume(sensorVol, sensorTr);
+    cellVol.placeVolume(sensorVol, RotationZYX(0, 90. * deg, 0. * deg)*sensorTr);
 
     // position of mirror in cylinder coordinate system
     double mirror_abs_pos_z = name_col * zstep - 0.5 * zstep * (2 == name_row);
@@ -211,7 +212,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
     for (int phin = 0; phin < phinmax; ++phin)
     {
-      PlacedVolume cellPV = motherVol.placeVolume(cellVol, RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z));
+      PlacedVolume cellPV = motherVol.placeVolume(cellVol, RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z)*pyramidTr);
       cellPV.addPhysVolID("system", detID).addPhysVolID("module", 17 * phin + name_col);
       // create mirrors as separate detectors, so properties can be adjusted lated!
       det.setPlacement(cellPV);
