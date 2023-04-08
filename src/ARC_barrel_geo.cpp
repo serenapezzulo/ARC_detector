@@ -28,7 +28,7 @@ using dd4hep::SubtractionSolid;
 #include "ARC_par_reader.hpp"
 
 /**
- * create barrel as sum of single cells. DEPRECATED!!
+ * create barrel as sum of single cells.
  * next step is to place mirrors+sensors in a cylindral shape gas volume
  */
 static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
@@ -483,4 +483,4 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   return det;
 }
 
-DECLARE_DETELEMENT(ARCBARREL_T, create_barrel)
+DECLARE_DETELEMENT(ARCBARREL_T, create_barrel_cell)
