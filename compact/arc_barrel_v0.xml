@@ -103,7 +103,8 @@
         - the material is `SiliconAirOptical`, to resolve a technical issue with the refractive boundary
     </comment>
     <module
-      material="SiliconAirOptical"
+      material="SiliconOptical"
+      surface="SensorSurface_PFRICH"
       vis="sensor_vis"
       sensor_side_Z="SENSOR_Y"
       sensor_side_Phi="SENSOR_X"
@@ -117,7 +118,6 @@
       material="Aluminum"
       vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
-      radius="MIRROR_RADIUS"
       surface="MirrorSurface"
       />
   </mirror>
@@ -125,7 +125,7 @@
 </detectors>
 
 <readouts>
-  <readout name="ARC_HITS">
+  <readout name="ARC_HITS_OLD">
     <segmentation
       type="CartesianGridXY"
       grid_size_x="SENSOR_pitchX"
@@ -135,6 +135,11 @@
       />
       <id>system:8,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
   </readout>
+  <readout name="ARC_HITS">
+      <segmentation type="CartesianGridXY" grid_size_x="SENSOR_X" grid_size_y="SENSOR_Y" />
+      <id>system:8,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
+  </readout>
+
 </readouts>
 
 </lccdd>
