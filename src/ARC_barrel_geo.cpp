@@ -167,6 +167,13 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     for (auto ncell_original : ncell_vector)
     {
+        // Activate flag to reflect parameters later
+        bool reflect_parameters = false;
+        if (0 > ncell)
+        {
+          ncell *= -1;
+          reflect_parameters = true;
+        }
       for (int phin = 0; phin < phinmax; ++phin)
       {
         int ncell = ncell_original;
@@ -193,13 +200,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         };
 
 
-        // Activate flag to reflect parameters later
-        bool reflect_parameters = false;
-        if (0 > ncell)
-        {
-          ncell *= -1;
-          reflect_parameters = true;
-        }
+
 
 
 
