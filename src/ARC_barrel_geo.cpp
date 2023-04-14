@@ -168,6 +168,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     for (auto ncell_original : ncell_vector)
     {
         // Activate flag to reflect parameters later
+        int ncell = ncell_original;
         bool reflect_parameters = false;
         if (0 > ncell)
         {
@@ -176,7 +177,6 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         }
       for (int phin = 0; phin < phinmax; ++phin)
       {
-        int ncell = ncell_original;
 
         // WARNING for developping purposes
         // The following line skips even number cells
@@ -191,9 +191,10 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
           continue;
 
 
-        auto create_part_name_ff = [ncell,detName,phin](std::string  partName){
+        auto create_part_name_ff = [ncell,detName,phin,reflect_parameters](std::string  partName){
           std::string fullName = detName + "_" + partName;
           fullName += std::to_string(ncell);
+          fullName += "_" + std::to_string(reflect_parameters);
           fullName += "_phi" +  std::to_string(phin);
           std::cout << "\tNew name: " << fullName << std::endl;
               return fullName;
