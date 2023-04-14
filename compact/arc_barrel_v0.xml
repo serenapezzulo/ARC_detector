@@ -43,7 +43,7 @@
   <vis name="mirror_vis19" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis20" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis21" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
-  <vis name="no_vis" showDaughters="false" visible="false" />
+  <vis name="no_vis" showDaughters="true" visible="false" />
 </display>
 
 <define>
