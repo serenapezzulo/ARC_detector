@@ -95,7 +95,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   double mirror_diameter_safe_shrink = 1*mm;
   double mirror_z_safe_shrink = 1*mm;
   double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm - mirror_z_safe_shrink;
-//   auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
+  //   auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
   auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
   double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
   auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
@@ -158,23 +158,23 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
     int cellCounter(0);
     // WARNING for developping purposes
-//     ncell_vector = {-2, 2};
+    //     ncell_vector = {-2, 2};
 
-//     phinmax = 2;
+    //     phinmax = 2;
 
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     for (auto ncell_original : ncell_vector)
     {
-        // Activate flag to reflect parameters later
-        int ncell = ncell_original;
-        bool reflect_parameters = false;
-        if (0 > ncell)
-        {
-          ncell *= -1;
-          reflect_parameters = true;
-        }
+      // Activate flag to reflect parameters later
+      int ncell = ncell_original;
+      bool reflect_parameters = false;
+      if (0 > ncell)
+      {
+        ncell *= -1;
+        reflect_parameters = true;
+      }
       for (int phin = 0; phin < phinmax; ++phin)
       {
 
@@ -194,10 +194,10 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         auto create_part_name_ff = [ncell,detName,phin,reflect_parameters](std::string  partName){
           std::string fullName = detName + "_" + partName;
           fullName += std::to_string(ncell);
-          fullName += "_" + std::to_string(reflect_parameters);
+          fullName += "_ref" + std::to_string(reflect_parameters);
           fullName += "_phi" +  std::to_string(phin);
           std::cout << "\tNew name: " << fullName << std::endl;
-              return fullName;
+          return fullName;
         };
 
 
@@ -211,7 +211,6 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         Volume cellVol(cellName, shape, gasvolMat);
         cellVol.setVisAttributes( gasvolVis );
         /// Detector element that will contain cellVol later
-//         DetElement cellDE(det, Form("ARC_DEcell%d", cellCounter), 3 * cellCounter);
         DetElement cellDE(det, cellName+"DE", 3 * cellCounter);
 
 
