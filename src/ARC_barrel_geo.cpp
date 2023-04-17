@@ -68,7 +68,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //         COOLING PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double cooling_radial_thickness = 1 * cm;
+  double cooling_radial_thickness = 0.5 * cm;
   // // //-------------------------------------------------------------// // //
 
 
@@ -141,7 +141,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   std::vector<double> zplanes = { vessel_inner_r, vessel_outer_r*cos(angle_hex) };
   std::vector<double> rs = { 0.895*hexagon_side_length, 0.955*hexagon_side_length };
   /// Hexagonal truncated pyramid
-  Polyhedra shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
+  Polyhedra cell_shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
   /// rotation of 90deg around Y axis, to align Z axis of pyramid with X axis of cylinder
   Transform3D pyramidTr(RotationZYX(0, -90. * deg, 0. * deg), Translation3D(0, 0, 0));
 
@@ -159,9 +159,9 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
     int cellCounter(0);
     // WARNING for developping purposes
-    //     ncell_vector = {-2, 2};
+//         ncell_vector = {1};
 
-    //     phinmax = 2;
+        phinmax = 1;
 
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
@@ -209,7 +209,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         std::string cellName = create_part_name_ff( "cell");
 
         /// Volume that contains gas and other stuff
-        Volume cellVol(cellName, shape, gasvolMat);
+        Volume cellVol(cellName, cell_shape, gasvolMat);
         cellVol.setVisAttributes( gasvolVis );
         /// Detector element that will contain cellVol later
         DetElement cellDE(det, cellName+"DE", 3 * cellCounter);
@@ -273,7 +273,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(center_of_sphere_x, 0, center_of_sphere_z - mirror_z_safe_shrink));
 
         // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
-        Solid mirrorSol = IntersectionSolid(shape, mirrorShapeFull, mirrorTr);
+        Solid mirrorSol = IntersectionSolid(cell_shape, mirrorShapeFull, mirrorTr);
 
         std::string mirrorName = create_part_name_ff("mirror"); // detName + "_mirror" + std::to_string(ncell) + "z" + std::to_string(reflect_parameters)
 
@@ -288,17 +288,34 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
         // Place detector in cell
         // Build sensor shape
+        // TODO dummy while developping
+//         angle_of_sensor = 45*deg;
         Box sensorSol(sensor_sidex / 2, sensor_sidey / 2, sensor_thickness / 2);
         std::string sensorName = create_part_name_ff("sensor");
         Volume sensorVol( sensorName , sensorSol, sensorMat );
         sensorVol.setVisAttributes( sensorVis );
         sensorVol.setSensitiveDetector(sens);
+
+        double cooling_z_offset =   sensor_thickness  + cooling_radial_thickness;
         Transform3D sensorTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin, 0, center_of_sensor_x));
         PlacedVolume sensorPV = cellVol.placeVolume(sensorVol, RotationZYX(0, 90. * deg, 0. * deg)*sensorTr);
         sensorPV.addPhysVolID("cellnumber", 3 * cellCounter+2);
         DetElement sensorDE(cellDE, sensorName + "DE", 3 * cellCounter+2 );
         sensorDE.setType("tracker");
         sensorDE.setPlacement(sensorPV);
+
+        Tube coolingSol_tube(0, hexagon_side_length, cooling_radial_thickness);
+        Transform3D coolingTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin+cooling_z_offset, 0, center_of_sensor_x));
+        auto coolingTrCell = RotationZYX(0, 90. * deg, 0. * deg)*coolingTr;
+
+        Solid coolingSol = IntersectionSolid(cell_shape, coolingSol_tube, coolingTrCell);
+
+        std::string coolingName = create_part_name_ff("cooling");
+        /// TODO: change material
+        Volume coolingVol( coolingName , coolingSol, mirrorMat );
+        coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
+
+        cellVol.placeVolume(coolingVol );
 
 
         // position of mirror in cylinder coordinate system
