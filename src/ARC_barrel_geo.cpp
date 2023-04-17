@@ -39,7 +39,6 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   xml::Component dims = detElem.dimensions();
   OpticalSurfaceManager surfMgr = desc.surfaceManager();
   DetElement det(detName, detID);
-  Assembly   barrel_cells_assembly (detName);
   sens.setType("tracker");
 
   auto vesselMat = desc.material(detElem.attr<std::string>(_Unicode(vessel_material)));
@@ -129,16 +128,18 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Build cylinder for gas.
-  Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
-                   vessel_outer_r - vessel_wall_thickness,
+  Tube envelopeS(  vessel_inner_r,
+                   vessel_outer_r,
                    vessel_length);
+  Volume barrel_cells_envelope (detName+"_envelope", envelopeS, desc.material("Air") );
+  barrel_cells_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
 
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Use truncated pyramid for barrel cells
-  double angle_hex = atan( hexagon_side_length / vessel_outer_r );
+  double angle_hex = atan( 2*hexagon_side_length / vessel_outer_r );
   std::vector<double> zplanes = { vessel_inner_r, vessel_outer_r*cos(angle_hex) };
-  std::vector<double> rs = { 0.89*hexagon_side_length, 0.96*hexagon_side_length };
+  std::vector<double> rs = { 0.895*hexagon_side_length, 0.955*hexagon_side_length };
   /// Hexagonal truncated pyramid
   Polyhedra shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
   /// rotation of 90deg around Y axis, to align Z axis of pyramid with X axis of cylinder
@@ -310,7 +311,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 
         auto cellTr = RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z)*pyramidTr ;
-        PlacedVolume cellPV = barrel_cells_assembly.placeVolume(cellVol, cellTr);
+        PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellVol, cellTr);
         cellDE.setPlacement(cellPV);
 
 
@@ -322,7 +323,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
-    PlacedVolume assemblyPV = motherVol.placeVolume(barrel_cells_assembly);
+    PlacedVolume assemblyPV = motherVol.placeVolume(barrel_cells_envelope);
     assemblyPV.addPhysVolID("system", detID);
     det.setPlacement(assemblyPV);
     return det;
