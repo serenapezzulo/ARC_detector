@@ -66,6 +66,14 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 
   // // // // // // // // // // // // // // // // // // // // // // // // // //
+  // // // // // // // //         AEROGEL PARAMETERS          // // // // // //
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  double aerogel_radial_thickness = 1.0 * cm;
+  auto aerogelMat = desc.material("Aerogel_PFRICH");
+
+  // // //-------------------------------------------------------------// // //
+
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //         COOLING PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   double cooling_radial_thickness = 0.5 * cm;
@@ -161,7 +169,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // WARNING for developping purposes
 //         ncell_vector = {1};
 
-        phinmax = 1;
+//         phinmax = 1;
 
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
@@ -296,7 +304,6 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         sensorVol.setVisAttributes( sensorVis );
         sensorVol.setSensitiveDetector(sens);
 
-        double cooling_z_offset =   sensor_thickness  + cooling_radial_thickness;
         Transform3D sensorTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin, 0, center_of_sensor_x));
         PlacedVolume sensorPV = cellVol.placeVolume(sensorVol, RotationZYX(0, 90. * deg, 0. * deg)*sensorTr);
         sensorPV.addPhysVolID("cellnumber", 3 * cellCounter+2);
@@ -304,18 +311,37 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         sensorDE.setType("tracker");
         sensorDE.setPlacement(sensorPV);
 
-        Tube coolingSol_tube(0, hexagon_side_length, cooling_radial_thickness);
-        Transform3D coolingTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin+cooling_z_offset, 0, center_of_sensor_x));
-        auto coolingTrCell = RotationZYX(0, 90. * deg, 0. * deg)*coolingTr;
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        {
+          double cooling_z_offset =   sensor_thickness  + cooling_radial_thickness;
+          Tube coolingSol_tube(0, 1.5*hexagon_side_length, cooling_radial_thickness);
+          Transform3D coolingTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin+cooling_z_offset, 0, center_of_sensor_x));
+          auto coolingTrCell = RotationZYX(0, 90. * deg, 0. * deg)*coolingTr;
+          Solid coolingSol = IntersectionSolid(cell_shape, coolingSol_tube, coolingTrCell);
+          std::string coolingName = create_part_name_ff("cooling");
+          /// TODO: change material
+          Volume coolingVol( coolingName , coolingSol, mirrorMat );
+          coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
+          cellVol.placeVolume(coolingVol );
+        }
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 
-        Solid coolingSol = IntersectionSolid(cell_shape, coolingSol_tube, coolingTrCell);
-
-        std::string coolingName = create_part_name_ff("cooling");
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        double aerogel_z_offset =   sensor_thickness + aerogel_radial_thickness;
+        Tube aerogelSol_tube(0, 1.5*hexagon_side_length, cooling_radial_thickness);
+        Transform3D aerogelTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin - aerogel_z_offset, 0, center_of_sensor_x));
+        auto aerogelTrCell = RotationZYX(0, 90. * deg, 0. * deg)*aerogelTr;
+        Solid aerogelSol = IntersectionSolid(cell_shape, aerogelSol_tube, aerogelTrCell);
+        std::string aerogelName = create_part_name_ff("aerogel");
         /// TODO: change material
-        Volume coolingVol( coolingName , coolingSol, mirrorMat );
-        coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
-
-        cellVol.placeVolume(coolingVol );
+        Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
+        aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
+        cellVol.placeVolume(aerogelVol );
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 
 
         // position of mirror in cylinder coordinate system
