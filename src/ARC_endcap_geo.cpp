@@ -81,6 +81,40 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     bool isReflected = {false};
   };
 
+
+//   ROGER NUMBERING OF THE UNIQUE CELLS INSIDE A SECTOR
+//   THIS SECTOR MUST BE MIRRORED, AND THEN
+//   BOTH (ORIGINAL AND MIRRORED) REPEATED 6 TIMES
+//
+//                         _____         _____
+//                        /     \       /     \
+//    7             _____/  21   \_____/  18   \
+//                 /     \       /     \       /
+//    7           /  20   \_____/  17   \_____/
+//                \       /     \       /     \
+//    6            \_____/  16   \_____/  14   \
+//                 /     \       /     \       /
+//    6           /  15   \_____/  13   \_____/
+//                \       /     \       /     \
+//    5            \_____/  12   \_____/  10   \
+//                 /     \       /     \       /
+//    5           /  11   \_____/   9   \_____/
+//                \       /     \       /     \
+//    4            \_____/   8   \_____/   7   \
+//                       \       /     \       /
+//    4                   \_____/   6   \_____/
+//                        /     \       /     \
+//    3                  /   5   \_____/   4   \
+//                       \       /     \       /
+//    3                   \_____/   3   \_____/
+//                              \       /     \
+//    2                          \_____/   2   \
+//                               /     \       /
+//    2                         /   1   \_____/
+//                              \       /
+//    COLUMN ^                   \_____/
+//    ROW->       4        3        2     1
+//
   /// vector with cell geometric parameters
   std::vector<mycell_t> mycell_v(21);
   {
