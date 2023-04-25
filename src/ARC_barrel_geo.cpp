@@ -220,6 +220,10 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         Volume cellVol(cellName, cell_shape, gasvolMat);
         cellVol.setVisAttributes( gasvolVis );
         /// Detector element that will contain cellVol later
+        /// there are 3 elements with ID:
+        /// the cell, ID= 3 * cellCounter
+        /// its mirror. ID = 3 * cellCounter +1
+        /// and its sensor, ID = 3 * cellCounter +2
         DetElement cellDE(det, cellName+"DE", 3 * cellCounter);
 
 
