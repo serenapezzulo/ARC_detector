@@ -47,18 +47,35 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // mother volume corresponds to the world
   Volume motherVol = desc.pickMotherVolume(det);
 
-  // Vessel, endcap
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  // // // // // // // //          VESSEL PARAMETERS          // // // // // //
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
   double vessel_outer_r = 190 * cm;
   double vessel_inner_r = 30.2 * cm;
   double vessel_length = 20 * cm;
   double vessel_wall_thickness = 1.0 * cm;
   if (vessel_outer_r <= vessel_inner_r)
     throw std::runtime_error("Ilegal parameters: vessel_outer_r <= vessel_inner_r");
+  // // //-------------------------------------------------------------// // //
 
-  // Cooling,
+
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  // // // // // // // //         AEROGEL PARAMETERS          // // // // // //
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  double aerogel_thickness = 1.0 * cm;
+  auto aerogelMat = desc.material("Aerogel_PFRICH");
+  // // //-------------------------------------------------------------// // //
+
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  // // // // // // // //         COOLING PARAMETERS          // // // // // //
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
   double cooling_thickness = 1 * cm;
+  // // //-------------------------------------------------------------// // //
 
-  // Cell parameters
+
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  // // // // // // // //           CELL PARAMETERS           // // // // // //
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
   /// Cell is an hexagonal prysm
   double hexagon_side_length = 14.815 * cm;
   double hexagon_apothem = hexagon_side_length * cos(30 * deg);
@@ -156,15 +173,42 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   /// number of repetition of unique cells around the endcap
   int phinmax = 6; // 6;
 
-  // Mirror parameters
+
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  // // // // // // // //          MIRROR PARAMETERS          // // // // // //
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
   double thickness_sphere(10 * mm);
   double mirror_z_origin_Martin = vessel_length / 2. - vessel_wall_thickness - 37 * cm;
+  //   auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
+  auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
+  double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
+  auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
+  auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
+  // // //-------------------------------------------------------------// // //
 
-  // Light sensor parameters
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
+  // // // // // //          LIGHT SENSOR PARAMETERS          // // // // // //
+  // // // // // // // // // // // // // // // // // // // // // // // // // //
   double sensor_sidex = 8 * cm;
   double sensor_sidey = 8 * cm;
   double sensor_thickness = 0.2 * cm;
   double sensor_z_origin_Martin = -vessel_length / 2. + vessel_wall_thickness + 0.5 * cooling_thickness;
+  // - sensor module
+  auto sensorElem = detElem.child(_Unicode(sensors)).child(_Unicode(module));
+  auto sensorVis = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
+  //   double sensorX = sensorElem.attr<double>(_Unicode(sensorX));
+  //   double sensorY = sensorElem.attr<double>(_Unicode(sensorY));
+  //   double sensorThickness = sensorElem.attr<double>(_Unicode(thickness));
+  auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
+  auto sensorMat = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
+
+  // // //-------------------------------------------------------------// // //
+
+
+
+  // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
+  // // //++++++++++++  BUILD VESSEL, CELL AND SENOR VOLUMES ++++++++++// // //
+  // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Build cylinder for gas.
   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
