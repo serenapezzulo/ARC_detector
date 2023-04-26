@@ -81,8 +81,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     bool isReflected = {false};
   };
 
-
-//   ROGER NUMBERING OF THE UNIQUE CELLS INSIDE A SECTOR
+// // // // // // // // // // // // // // // // // // // // // // //
+//   SCHEME OF UNIQUE CELLS INSIDE A SECTOR
+//   CELL NUMBERING CORRESPONDS TO ROGERS
+//   MARTIN NUMBERING SPECIFIED BY ROW/COLUMN
 //   THIS SECTOR MUST BE MIRRORED, AND THEN
 //   BOTH (ORIGINAL AND MIRRORED) REPEATED 6 TIMES
 //
@@ -115,6 +117,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 //    COLUMN ^                   \_____/
 //    ROW->       4        3        2     1
 //
+//   Y axis = column
+//   X axis = row
+// // // // // // // // // // // // // // // // // // // // // // //
+
   /// vector with cell geometric parameters
   std::vector<mycell_t> mycell_v(21);
   {
