@@ -359,7 +359,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     } //-- end loop for sector
   }   //-- end loop for endcap
 
-  PlacedVolume envelopePV = motherVol.placeVolume(barrel_cells_envelope);
+  Transform3D envelopeTr(RotationZYX(0,0,0), Translation3D(0, 0, 220*cm));
+  PlacedVolume envelopePV = motherVol.placeVolume(barrel_cells_envelope, envelopeTr);
   envelopePV.addPhysVolID("system", detID);
   det.setPlacement(envelopePV);
 
