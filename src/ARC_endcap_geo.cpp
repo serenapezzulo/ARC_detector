@@ -24,6 +24,8 @@ using namespace dd4hep;
 using namespace dd4hep::rec;
 using dd4hep::SubtractionSolid;
 
+#include <string>
+
 
 #include "ARC_par_reader.hpp"
 
@@ -33,10 +35,17 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   xml::DetElement detElem = handle;
   std::string detName = detElem.nameStr();
   int detID = detElem.id();
-  xml::Component dims = detElem.dimensions();
+//   xml::Component dims = detElem.dimensions();
   OpticalSurfaceManager surfMgr = desc.surfaceManager();
   DetElement det(detName, detID);
   sens.setType("tracker");
+
+
+  auto vesselMat = desc.material(detElem.attr<std::string>(_Unicode(vessel_material)));
+  auto gasvolMat = desc.material(detElem.attr<std::string>(_Unicode(gas_material)));
+  auto vesselVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(vessel_vis)));
+  auto gasvolVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(gas_vis)));
+
 
   // read Martin file and store parameters by name in the map
   fill_cell_parameters_m();
@@ -103,32 +112,32 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 //   BOTH (ORIGINAL AND MIRRORED) REPEATED 6 TIMES
 //
 //                         _____         _____
-//                        /     \       /     \
-//    7             _____/  21   \_____/  18   \
-//                 /     \       /     \       /
-//    7           /  20   \_____/  17   \_____/
-//                \       /     \       /     \
-//    6            \_____/  16   \_____/  14   \
-//                 /     \       /     \       /
-//    6           /  15   \_____/  13   \_____/
-//                \       /     \       /     \
-//    5            \_____/  12   \_____/  10   \
-//                 /     \       /     \       /
-//    5           /  11   \_____/   9   \_____/
-//                \       /     \       /     \
-//    4            \_____/   8   \_____/   7   \
-//                       \       /     \       /
-//    4                   \_____/   6   \_____/
-//                        /     \       /     \
-//    3                  /   5   \_____/   4   \
-//                       \       /     \       /
-//    3                   \_____/   3   \_____/
-//                              \       /     \
-//    2                          \_____/   2   \
-//                               /     \       /
-//    2                         /   1   \_____/
-//                              \       /
-//    COLUMN ^                   \_____/
+//                        /     \       /     \    .
+//    7             _____/  21   \_____/  18   \   .
+//                 /     \       /     \       /   .
+//    7           /  20   \_____/  17   \_____/    .
+//                \       /     \       /     \    .
+//    6            \_____/  16   \_____/  14   \   .
+//                 /     \       /     \       /   .
+//    6           /  15   \_____/  13   \_____/    .
+//                \       /     \       /     \    .
+//    5            \_____/  12   \_____/  10   \   .
+//                 /     \       /     \       /   .
+//    5           /  11   \_____/   9   \_____/    .
+//                \       /     \       /     \    .
+//    4            \_____/   8   \_____/   7   \   .
+//                       \       /     \       /   .
+//    4                   \_____/   6   \_____/    .
+//                        /     \       /     \    .
+//    3                  /   5   \_____/   4   \   .
+//                       \       /     \       /   .
+//    3                   \_____/   3   \_____/    .
+//                              \       /     \    .
+//    2                          \_____/   2   \   .
+//                               /     \       /   .
+//    2                         /   1   \_____/    .
+//                              \       /          .
+//    COLUMN ^                   \_____/           .
 //    ROW->       4        3        2     1
 //
 //   Y axis = column
@@ -163,20 +172,16 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     mycell_v[20] = {5, 6, 19, -6.0 * hx_x, 12 * hx_u};
   }
 
-  /// Distance in phi angle between cells
-  /// since cells are regular hexagons, this distance matches
-  /// the angle that one cell covers
+  /// Distance in phi angle between complete sectors
   double phistep = 60 * deg;
-  /// number of repetition of unique cells around the endcap
+  /// number of repetition of sectors
   int phinmax = 6; // 6;
 
 
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //          MIRROR PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double thickness_sphere(10 * mm);
   double mirror_z_origin_Martin = vessel_length / 2. - vessel_wall_thickness - 37 * cm;
-  //   auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
   auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
   double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
   auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
@@ -211,13 +216,14 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
                    vessel_outer_r - vessel_wall_thickness,
                    vessel_length);
+  Volume gasvolVol( detName + "_envelope", gasvolSolid, desc.material("Air") );
 
   // Use regular polyhedra for endcaps cells
   PolyhedraRegular cellS(6, 0, 0., hexagon_apothem, vessel_length);
 
   // Build sensor shape
   Box sensorSol(sensor_sidex / 2, sensor_sidey / 2, sensor_thickness / 2);
-  Volume sensorVol(detName + "_sensor", sensorSol, desc.material("Aluminum"));
+  Volume sensorVol(detName + "_sensor", sensorSol, sensorMat);
 
   // Build the mirror for ncell=1..21
   // auto ncell = mycell_v[0];
@@ -230,9 +236,18 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     for (int phin = 0; phin < phinmax; phin++)
     {
 
-      std::string volname = detName + "_cell" + std::to_string(ncell.RID);
-      volname += "_phin" + std::to_string(phin);
-      Volume cellV(volname, cellS, desc.material("C4F10_PFRICH"));
+        auto create_part_name_ff = [ncell,detName,phin](std::string  partName){
+          std::string fullName = detName + "_" + partName;
+          fullName += std::to_string(ncell.RID);
+          fullName += "_ref" + std::to_string(ncell.isReflected);
+          fullName += "_phi" +  std::to_string(phin);
+          std::cout << "\tNew name: " << fullName << std::endl;
+          return fullName;
+        };
+
+
+      std::string volname = create_part_name_ff("cell");
+      Volume cellV(volname, cellS, gasvolMat);
 
       // The following line skips even number cells
       // if ( 1 != ncell.row )
@@ -268,8 +283,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
           throw std::runtime_error("Ilegal parameters: center_of_sphere_z not provided");
         if (-999. == radius_of_sphere)
           throw std::runtime_error("Ilegal parameters: radius_of_sphere not provided");
-        if (radius_of_sphere <= thickness_sphere)
-          throw std::runtime_error(Form("Ilegal parameters cell %d: %g <= %g", ncell.RID, radius_of_sphere, thickness_sphere));
+        if (radius_of_sphere <= mirrorThickness)
+          throw std::runtime_error(Form("Ilegal parameters cell %d: %g <= %g", ncell.RID, radius_of_sphere, mirrorThickness));
 
         if (-999. == center_of_sensor_x)
           throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
@@ -278,7 +293,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       }
 
       // create the semi-sphere that will result in the mirror
-      Sphere mirrorShapeFull(radius_of_sphere - thickness_sphere,
+      Sphere mirrorShapeFull(radius_of_sphere - mirrorThickness,
                              radius_of_sphere,
                              0.,
                              3.14 / 2);
@@ -288,7 +303,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         alpha += 180 * deg;
       double dx = center_of_sphere_x * cos(alpha);
       double dy = center_of_sphere_x * sin(alpha);
-      std::cout << ncell.RID << '\t' << center_of_sphere_x << '\t' << alpha / rad * deg << std::endl;
+//       std::cout << ncell.RID << '\t' << center_of_sphere_x << '\t' << alpha / rad * deg << std::endl;
 
       Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(dx, dy, center_of_sphere_z));
 
@@ -357,8 +372,8 @@ static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, Se
   xml::DetElement detElem = handle;
   std::string detName = detElem.nameStr();
   int detID = detElem.id();
-  xml::Component dims = detElem.dimensions();
-  OpticalSurfaceManager surfMgr = desc.surfaceManager();
+//   xml::Component dims = detElem.dimensions();
+//   OpticalSurfaceManager surfMgr = desc.surfaceManager();
   DetElement det(detName, detID);
   sens.setType("tracker");
 
@@ -377,7 +392,7 @@ static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, Se
     throw std::runtime_error("Ilegal parameters: vessel_outer_r <= vessel_inner_r");
 
   // Cooling,
-  double cooling_thickness = 1 * cm;
+//   double cooling_thickness = 1 * cm;
 
   // Cell parameters
   /// Cell is an hexagonal prysm
@@ -438,14 +453,14 @@ static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, Se
   int phinmax = 6; // 27;
 
   // Mirror parameters
-  double thickness_sphere(10 * mm);
-  double mirror_z_origin_Martin = vessel_length / 2. - vessel_wall_thickness - 37 * cm;
+//   double thickness_sphere(10 * mm);
+//   double mirror_z_origin_Martin = vessel_length / 2. - vessel_wall_thickness - 37 * cm;
 
   // Light sensor parameters
-  double sensor_sidex = 8 * cm;
-  double sensor_sidey = 8 * cm;
-  double sensor_thickness = 0.2 * cm;
-  double sensor_z_origin_Martin = -vessel_length / 2. + vessel_wall_thickness + 0.5 * cooling_thickness;
+//   double sensor_sidex = 8 * cm;
+//   double sensor_sidey = 8 * cm;
+//   double sensor_thickness = 0.2 * cm;
+//   double sensor_z_origin_Martin = -vessel_length / 2. + vessel_wall_thickness + 0.5 * cooling_thickness;
 
   // Build cylinder for gas.
   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
@@ -459,7 +474,7 @@ static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, Se
 
   for (auto ncell : mycell_v)
   {
-    for (int phin = 0; phin < 6; phin++)
+    for (int phin = 0; phin < phinmax; phin++)
     {
 
       std::string volname = detName + "_cell" + std::to_string(ncell.RID);
