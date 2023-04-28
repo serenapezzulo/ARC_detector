@@ -229,29 +229,30 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // auto ncell = mycell_v[0];
   for (auto &ncell : mycell_v)
   {
+    // sanity check, skip non initialized cells
     if (-1 == ncell.RID)
       continue;
-    // if( 5 != ncell.row )
-    // continue;
+
+    // The following line skips even number cells
+    // if ( 1 != ncell.row )
+    //   continue;
     for (int phin = 0; phin < phinmax; phin++)
     {
 
-        auto create_part_name_ff = [ncell,detName,phin](std::string  partName){
+      /// function to create names in a systematic way
+      /// final name = detName + part + cell parameters
+      auto create_part_name_ff = [ncell,detName,phin](std::string  partName){
           std::string fullName = detName + "_" + partName;
           fullName += std::to_string(ncell.RID);
-          fullName += "_ref" + std::to_string(ncell.isReflected);
           fullName += "_phi" +  std::to_string(phin);
           std::cout << "\tNew name: " << fullName << std::endl;
           return fullName;
         };
 
-
+      /// cell volume, hex prism
+      /// the elements must be placed inside
       std::string volname = create_part_name_ff("cell");
       Volume cellV(volname, cellS, gasvolMat);
-
-      // The following line skips even number cells
-      // if ( 1 != ncell.row )
-      //   continue;
 
       // // initialize parameters for creating the mirror
       double center_of_sphere_x(-999.);
@@ -297,7 +298,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                              radius_of_sphere,
                              0.,
                              3.14 / 2);
-      /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
+      /// alpha: angle of position vector of first sector n-cell with respect to x-axis
       double alpha = atan(ncell.y / ncell.x) * rad;
       if (0 > alpha)
         alpha += 180 * deg;
@@ -305,12 +306,13 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       double dy = center_of_sphere_x * sin(alpha);
 //       std::cout << ncell.RID << '\t' << center_of_sphere_x << '\t' << alpha / rad * deg << std::endl;
 
+      /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
       Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(dx, dy, center_of_sphere_z));
 
       /// Define the actual mirror as intersection of the hex cell volume and the hollow sphere just defined
       Solid mirrorSol = IntersectionSolid(cellS, mirrorShapeFull, mirrorTr);
-      std::string mirrorVolName = detName + "_mirror" + std::to_string(ncell.RID) + "z" + std::to_string(ncell.isReflected);
-      Volume mirrorVol(mirrorVolName, mirrorSol, desc.material("Aluminum"));
+      std::string mirrorVolName = create_part_name_ff("mirror");
+      Volume mirrorVol(mirrorVolName, mirrorSol, mirrorMat);
       mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
       cellV.placeVolume(mirrorVol);
 
@@ -319,38 +321,23 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
       cellV.placeVolume(sensorVol, sensorTr);
 
-      // // position of mirror in cylinder coordinate system
-      // double mirror_abs_pos_z = name_col * zstep - 0.5 * zstep * (2 == name_row);
-      // if (reflect_parameters)
-      //   mirror_abs_pos_z *= -1.0;
 
-      // // row 2 is shifted half step size
-      // double phi_offset = 0 + 0.5 * phistep * (2 == name_row);
-
-      // for (int phin = 0; phin < phinmax; ++phin)
-      // {
-      //   PlacedVolume cellPV = motherVol.placeVolume(cellVol, RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z));
-      //   cellPV.addPhysVolID("system", detID).addPhysVolID("module", 17 * phin + name_col);
-      //   // create mirrors as separate detectors, so properties can be adjusted lated!
-      //   det.setPlacement(cellPV);
-      // }
-
-      cellV.setVisAttributes(desc.visAttributes("gas_vis"));
+      cellV.setVisAttributes( gasvolVis );
       PlacedVolume cellPV = motherVol.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
       cellPV.addPhysVolID("system", detID).addPhysVolID("module", ncell.RID);
       // create mirrors as separate detectors, so properties can be adjusted lated!
       det.setPlacement(cellPV);
+
       if (ncell.isReflected)
       {
-        Volume cellV_reflected(volname + "_z1", cellS, desc.material("C4F10_PFRICH"));
+        Volume cellV_reflected(volname + "_ref1", cellS, desc.material("C4F10_PFRICH"));
         cellV_reflected.setVisAttributes(desc.visAttributes("gas_vis"));
         Transform3D mirrorTr_reflected(RotationZYX(0, 0, 0), Translation3D(-dx, dy, center_of_sphere_z));
 
         // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
         /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
         Solid mirrorSol_reflected = IntersectionSolid(cellS, mirrorShapeFull, mirrorTr_reflected);
-        std::string mirror_name = detName + "_mirror" + std::to_string(ncell.RID) + "z" + std::to_string(ncell.isReflected);
-        Volume mirrorVol_reflected(mirror_name, mirrorSol_reflected, desc.material("Aluminum"));
+        Volume mirrorVol_reflected(mirrorVolName + "_ref1", mirrorSol_reflected, mirrorMat);
         mirrorVol_reflected.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
         cellV_reflected.placeVolume(mirrorVol_reflected);
         Transform3D sensorTr_reflected(RotationZYX(-alpha + 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor),
