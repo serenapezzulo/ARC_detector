@@ -56,8 +56,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //          VESSEL PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double vessel_outer_r = 190 * cm;
-  double vessel_inner_r = 30.2 * cm;
+//   double vessel_outer_r = 190 * cm;
+//   double vessel_inner_r = 30.2 * cm;
+  double vessel_outer_r = 220 * cm;
+  double vessel_inner_r = 25 * cm;
   double vessel_length = 20 * cm;
   double vessel_wall_thickness = 1.0 * cm;
   if (vessel_outer_r <= vessel_inner_r)
