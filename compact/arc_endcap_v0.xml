@@ -15,8 +15,8 @@
 </includes>
 
 <display>
-  <vis name="vessel_vis"  r="236/256" g="237/256" b="232/256" alpha="0.9"  showDaughters="true" visible="true" />
-  <vis name="gas_vis"     r="227/256" g="239/256" b="217/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="vessel_vis"  r="236/256" g="237/256" b="232/256" alpha="0.9"  showDaughters="true" visible="false" />
+  <vis name="gas_vis"     r="227/256" g="239/256" b="217/256" alpha="1.0"  showDaughters="true" visible="false" />
   <vis name="aerogel_vis" r="244/256" g="177/256" b="132/256" alpha="0.5"  showDaughters="true" visible="true" />
   <vis name="cooling_vis" r="254/256" g="230/256" b="151/256" alpha="0.5"  showDaughters="true" visible="true" />
   <vis name="sensor_vis"  r="255/256" g="0/256"   b="0/256"   alpha="1.0"  showDaughters="true" visible="true" />
@@ -43,7 +43,8 @@
   <vis name="mirror_vis19" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis20" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="mirror_vis21" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
-  <vis name="no_vis" showDaughters="false" visible="false" />
+  <vis name="no_vis" showDaughters="true" visible="false" />
+  <vis name="envelope_vis"  r="0/256"   g="96/256"  b="156/256" alpha="0.1"  showDaughters="true" visible="false" />
 </display>
 
 <define>
@@ -62,7 +63,6 @@
   <constant name="SENSOR_NStripsY"        value="100"       />
   <constant name="SENSOR_pitchX"          value="0.08*cm" />
   <constant name="SENSOR_pitchY"          value="0.08*cm" />
-  <constant name="SENSOR_Y"               value="8.0*cm"    />
   <constant name="MIRROR_THICKNESS"       value="0.2*cm"    />
   <constant name="MIRROR_RADIUS"          value="36.9*cm"   />
   <constant name="COOLING_THICKNESS"      value="0.5*cm"    />
@@ -103,11 +103,12 @@
         - the material is `SiliconAirOptical`, to resolve a technical issue with the refractive boundary
     </comment>
     <module
-      material="SiliconAirOptical"
+      material="SiliconOptical"
       vis="sensor_vis"
       sensor_side_Z="SENSOR_Y"
       sensor_side_Phi="SENSOR_X"
       thickness="SENSOR_THICKNESS"
+      surface="SensorSurface_PFRICH"
       />
   </sensors>
   <!-- /detectors/detector/mirror -->
