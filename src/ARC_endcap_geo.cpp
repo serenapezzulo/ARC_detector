@@ -245,7 +245,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // The following line skips even number cells
     // if ( 1 != ncell.row )
     //   continue;
-    for (int phin = 0; phin < phinmax; phin++)
+    for (int phin = 0; phin < phinmax; phin++, cellCounter++)
     {
 
       /// function to create names in a systematic way
@@ -333,7 +333,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
       cellV.setVisAttributes( gasvolVis );
       PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
-      cellPV.addPhysVolID("module", ncell.RID);
+      cellPV.addPhysVolID("module", 6*cellCounter + 0);
       // create mirrors as separate detectors, so properties can be adjusted lated!
 //       det.setPlacement(cellPV);
 
@@ -353,7 +353,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
 
-        barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
+        PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
+        cell_ref_PV.addPhysVolID("module", 6*cellCounter + 3);
       }
     } //-- end loop for sector
   }   //-- end loop for endcap
