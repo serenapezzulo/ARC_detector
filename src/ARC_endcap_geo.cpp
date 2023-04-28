@@ -260,8 +260,17 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
       /// cell volume, hex prism
       /// the elements must be placed inside
-      std::string volname = create_part_name_ff("cell");
-      Volume cellV(volname, cellS, gasvolMat);
+      std::string cellName = create_part_name_ff("cell");
+      Volume cellV(cellName, cellS, gasvolMat);
+      cellV.setVisAttributes( gasvolVis );
+      /// Detector element that will contain cellVol later
+      /// there are 3 elements with ID:
+      /// the cell, ID= 6 * cellCounter
+      /// its mirror. ID = 6 * cellCounter +1
+      /// and its sensor, ID = 6 * cellCounter +2
+      DetElement cellDE(det, cellName+"DE", 6 * cellCounter + 0);
+
+
 
       // // initialize parameters for creating the mirror
       double center_of_sphere_x(-999.);
@@ -323,7 +332,13 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       std::string mirrorVolName = create_part_name_ff("mirror");
       Volume mirrorVol(mirrorVolName, mirrorSol, mirrorMat);
       mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
-      cellV.placeVolume(mirrorVol);
+      PlacedVolume mirrorPV = cellV.placeVolume(mirrorVol);
+
+      DetElement mirrorDE(cellDE, mirrorVolName + "DE", 6 * cellCounter+1 );
+      mirrorDE.setPlacement(mirrorPV);
+      SkinSurface mirrorSkin(desc, mirrorDE, Form("mirror_optical_surface%d", cellCounter), mirrorSurf, mirrorVol); // FIXME: 3rd arg needs `imod`?
+      mirrorSkin.isValid();
+
 
       // // Place detector in cell
       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor /*ncell.row*20*deg*/),
@@ -331,30 +346,36 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       cellV.placeVolume(sensorVol, sensorTr);
 
 
-      cellV.setVisAttributes( gasvolVis );
       PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
       cellPV.addPhysVolID("module", 6*cellCounter + 0);
-      // create mirrors as separate detectors, so properties can be adjusted lated!
-//       det.setPlacement(cellPV);
+      cellDE.setPlacement( cellPV );
 
       if (ncell.isReflected)
       {
-        Volume cellV_reflected(volname + "_ref1", cellS, desc.material("C4F10_PFRICH"));
-        cellV_reflected.setVisAttributes(desc.visAttributes("gas_vis"));
+        std::string cellRefName = create_part_name_ff("cell_ref");
+        Volume cellV_reflected(cellRefName, cellS, gasvolMat);
+        cellV_reflected.setVisAttributes( gasvolVis );
+        DetElement cell_reflected_DE(det, cellRefName+"DE", 6 * cellCounter + 3);
         Transform3D mirrorTr_reflected(RotationZYX(0, 0, 0), Translation3D(-dx, dy, center_of_sphere_z));
 
-        // TODO: cell 18 corresponds to half a pyramid, currently is full pyramid
         /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
         Solid mirrorSol_reflected = IntersectionSolid(cellS, mirrorShapeFull, mirrorTr_reflected);
         Volume mirrorVol_reflected(mirrorVolName + "_ref1", mirrorSol_reflected, mirrorMat);
         mirrorVol_reflected.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
-        cellV_reflected.placeVolume(mirrorVol_reflected);
+        PlacedVolume mirror_ref_PV = cellV_reflected.placeVolume(mirrorVol_reflected);
+
+        DetElement mirror_ref_DE(cell_reflected_DE, mirrorVolName + "_ref1" + "DE", 6 * cellCounter+4 );
+        mirror_ref_DE.setPlacement(mirror_ref_PV);
+        SkinSurface mirror_ref_Skin(desc, mirror_ref_DE, Form("mirror_ref_optical_surface%d", cellCounter), mirrorSurf, mirrorVol); // FIXME: 3rd arg needs `imod`?
+        mirror_ref_Skin.isValid();
+
         Transform3D sensorTr_reflected(RotationZYX(-alpha + 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor),
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
 
         PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
         cell_ref_PV.addPhysVolID("module", 6*cellCounter + 3);
+        cell_reflected_DE.setPlacement( cell_ref_PV );
       }
     } //-- end loop for sector
   }   //-- end loop for endcap
