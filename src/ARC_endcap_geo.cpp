@@ -213,10 +213,18 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Build cylinder for gas.
-  Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
-                   vessel_outer_r - vessel_wall_thickness,
+//   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
+//                    vessel_outer_r - vessel_wall_thickness,
+//                    vessel_length);
+//   Volume gasvolVol( detName + "_envelope", gasvolSolid, desc.material("Air") );
+
+
+  // Build cylinder for gas.
+  Tube envelopeS(  vessel_inner_r,
+                   vessel_outer_r,
                    vessel_length);
-  Volume gasvolVol( detName + "_envelope", gasvolSolid, desc.material("Air") );
+  Volume barrel_cells_envelope (detName+"_envelope", envelopeS, desc.material("Air") );
+  barrel_cells_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
 
   // Use regular polyhedra for endcaps cells
   PolyhedraRegular cellS(6, 0, 0., hexagon_apothem, vessel_length);
@@ -227,6 +235,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   // Build the mirror for ncell=1..21
   // auto ncell = mycell_v[0];
+  int cellCounter = 0;
   for (auto &ncell : mycell_v)
   {
     // sanity check, skip non initialized cells
@@ -323,10 +332,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 
       cellV.setVisAttributes( gasvolVis );
-      PlacedVolume cellPV = motherVol.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
-      cellPV.addPhysVolID("system", detID).addPhysVolID("module", ncell.RID);
+      PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
+      cellPV.addPhysVolID("module", ncell.RID);
       // create mirrors as separate detectors, so properties can be adjusted lated!
-      det.setPlacement(cellPV);
+//       det.setPlacement(cellPV);
 
       if (ncell.isReflected)
       {
@@ -344,10 +353,14 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
 
-        motherVol.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
+        barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
       }
     } //-- end loop for sector
   }   //-- end loop for endcap
+
+  PlacedVolume envelopePV = motherVol.placeVolume(barrel_cells_envelope);
+  envelopePV.addPhysVolID("system", detID);
+  det.setPlacement(envelopePV);
 
   return det;
 }
