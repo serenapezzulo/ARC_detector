@@ -27,10 +27,7 @@ using dd4hep::SubtractionSolid;
 
 #include "ARC_par_reader.hpp"
 
-/**
- * create endcap as sum of single cells. DEPRECATED!!
- * next step is to place mirrors+sensors in a cylindral shape gas volume
- */
+/// Function to build one ARC endcap
 static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
 {
   xml::DetElement detElem = handle;
@@ -354,7 +351,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 }
 DECLARE_DETELEMENT(ARCENDCAP_T, create_endcap_cell)
 
-/// This fcn just build the individual cell volume, without elements
+/// Deprecated
 static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
 {
   xml::DetElement detElem = handle;
