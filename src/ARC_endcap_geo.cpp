@@ -240,6 +240,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // Build cells of a sector
   // auto ncell = mycell_v[0];
   int cellCounter = 0;
+  std::ofstream ofile_sensor_pos("ofile_sensor_pos_endcap.txt");
   for (auto &ncell : mycell_v)
   {
     // sanity check, skip non initialized cells
@@ -351,7 +352,12 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
       PlacedVolume sensorPV = cellV.placeVolume(sensorVol, sensorTr);
       sensorPV.addPhysVolID("module", 6 * cellCounter+2);
-
+      ofile_sensor_pos  << 6 * cellCounter+2 << '\t'
+                         << ncell.RID << '\t'
+                         << ncell.isReflected << '\t'
+                         << ncell.x << '\t'
+                         << ncell.y << '\t'
+                         << phin << '\n';
       DetElement sensorDE(cellDE, create_part_name_ff("sensor") + "DE", 6 * cellCounter+2 );
       sensorDE.setType("tracker");
       sensorDE.setPlacement(sensorPV);
@@ -387,6 +393,13 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 //         sensor_ref_DE.setType("tracker");
 //         sensor_ref_DE.setPlacement(sensor_ref_PV);
 
+        ofile_sensor_pos  << 6 * cellCounter+5 << '\t'
+                    << ncell.RID << '\t'
+                    << ncell.isReflected << '\t'
+                    << ncell.x << '\t'
+                    << ncell.y << '\t'
+                    << phin << '\n';
+
         PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
 //         cell_ref_PV.addPhysVolID("module", 6*cellCounter + 3);
         cell_reflected_DE.setPlacement( cell_ref_PV );
@@ -396,7 +409,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   Transform3D envelopeTr(RotationZYX(0,0,0), Translation3D(0, 0, 220*cm));
   PlacedVolume envelopePV = motherVol.placeVolume(barrel_cells_envelope, envelopeTr);
-  envelopePV.addPhysVolID("system", detID);
+  envelopePV.addPhysVolID("system", 0);
   det.setPlacement(envelopePV);
 
   return det;
