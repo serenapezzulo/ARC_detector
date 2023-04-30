@@ -89,6 +89,11 @@ A new canvas will open showing something similar to the following graph:
 
 Hit pattern of photons (and pion) in the detector
 
+One can inspect the hit pattern in the sensor from the cellID parameters,
+
+```
+EVENT->Scan("((ARC_HITS.cellID>>32)&0xFFFF):(ARC_HITS.cellID>>48)" )
+```
 
 # Useful links
 
