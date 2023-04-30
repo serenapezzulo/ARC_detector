@@ -234,8 +234,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // Build sensor shape
   Box sensorSol(sensor_sidex / 2, sensor_sidey / 2, sensor_thickness / 2);
   Volume sensorVol(detName + "_sensor", sensorSol, sensorMat);
+  sensorVol.setSensitiveDetector(sens);
+  sensorVol.setVisAttributes( sensorVis );
 
-  // Build the mirror for ncell=1..21
+  // Build cells of a sector
   // auto ncell = mycell_v[0];
   int cellCounter = 0;
   for (auto &ncell : mycell_v)
@@ -247,6 +249,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // The following line skips even number cells
     // if ( 1 != ncell.row )
     //   continue;
+
+    /// repeat the sector 6 times
     for (int phin = 0; phin < phinmax; phin++, cellCounter++)
     {
 
@@ -346,12 +350,14 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor /*ncell.row*20*deg*/),
                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
       PlacedVolume sensorPV = cellV.placeVolume(sensorVol, sensorTr);
+      sensorPV.addPhysVolID("module", 6 * cellCounter+2);
+
       DetElement sensorDE(cellDE, create_part_name_ff("sensor") + "DE", 6 * cellCounter+2 );
       sensorDE.setType("tracker");
       sensorDE.setPlacement(sensorPV);
 
       PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
-      cellPV.addPhysVolID("module", 6*cellCounter + 0);
+//       cellPV.addPhysVolID("module", 6*cellCounter + 0);
       cellDE.setPlacement( cellPV );
 
       if (ncell.isReflected)
@@ -370,19 +376,19 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
         DetElement mirror_ref_DE(cell_reflected_DE, mirrorVolName + "_ref1" + "DE", 6 * cellCounter+4 );
         mirror_ref_DE.setPlacement(mirror_ref_PV);
-        SkinSurface mirror_ref_Skin(desc, mirror_ref_DE, Form("mirror_ref_optical_surface%d", cellCounter), mirrorSurf, mirrorVol); // FIXME: 3rd arg needs `imod`?
+        SkinSurface mirror_ref_Skin(desc, mirror_ref_DE, Form("mirror_ref_optical_surface%d", cellCounter), mirrorSurf, mirrorVol_reflected); // FIXME: 3rd arg needs `imod`?
         mirror_ref_Skin.isValid();
 
         Transform3D sensorTr_reflected(RotationZYX(-alpha + 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor),
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         PlacedVolume sensor_ref_PV = cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
         sensor_ref_PV.addPhysVolID("module", 6 * cellCounter+5);
-        DetElement sensor_ref_DE(cell_reflected_DE, create_part_name_ff("sensor") + "_ref_DE", 6 * cellCounter+5 );
-        sensor_ref_DE.setType("tracker");
-        sensor_ref_DE.setPlacement(sensor_ref_PV);
+//         DetElement sensor_ref_DE(cell_reflected_DE, create_part_name_ff("sensor") + "_ref_DE", 6 * cellCounter+5 );
+//         sensor_ref_DE.setType("tracker");
+//         sensor_ref_DE.setPlacement(sensor_ref_PV);
 
         PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
-        cell_ref_PV.addPhysVolID("module", 6*cellCounter + 3);
+//         cell_ref_PV.addPhysVolID("module", 6*cellCounter + 3);
         cell_reflected_DE.setPlacement( cell_ref_PV );
       }
     } //-- end loop for sector
