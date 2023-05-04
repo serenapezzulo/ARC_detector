@@ -124,6 +124,6 @@
 # For file-based drivers, use this to create an empty detector view:
 #/vis/viewer/flush
 
-/vis/ASCIITree/set/outFile kk.txt
-/vis/ASCIITree/verbose 2
-/vis/drawTree
+# /vis/ASCIITree/set/outFile kk.txt
+# /vis/ASCIITree/verbose 2
+# /vis/drawTree
