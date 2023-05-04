@@ -36,7 +36,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   xml::DetElement detElem = handle;
   std::string detName = detElem.nameStr();
   int detID = detElem.id();
-  xml::Component dims = detElem.dimensions();
+//   xml::Component dims = detElem.dimensions();
   OpticalSurfaceManager surfMgr = desc.surfaceManager();
   DetElement det(detName, detID);
   sens.setType("tracker");
@@ -83,9 +83,10 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //           CELL PARAMETERS           // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double hexagon_side_length = 14.815 * cm;
   /// Distance in x-direction
-  double zstep = 2 * hexagon_side_length;
+  double hexagon_side_length = 14.815 * cm;
+  double hex_apothem_length = hexagon_side_length*cos( M_PI / 6. ); //
+  double zstep = 2 * hex_apothem_length;
   /// Distance in phi angle between cells
   /// since cells are regular hexagons, this distance matches
   /// the angle that one cell covers
@@ -98,15 +99,14 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //          MIRROR PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double thickness_sphere(10 * mm);
-  double mirror_diameter_safe_shrink = 1*mm;
-  double mirror_z_safe_shrink = 1*mm;
-  double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm - mirror_z_safe_shrink;
-  //   auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
+//   double mirror_diameter_safe_shrink = 1*mm;
   auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
-  double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
   auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
   auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
+  double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
+  double mirror_z_safe_shrink = 1*mm;
+  double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm  - mirrorThickness - mirror_z_safe_shrink;
+  //   auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
   // // //-------------------------------------------------------------// // //
 
 
@@ -124,7 +124,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   //   double sensorX = sensorElem.attr<double>(_Unicode(sensorX));
   //   double sensorY = sensorElem.attr<double>(_Unicode(sensorY));
   //   double sensorThickness = sensorElem.attr<double>(_Unicode(thickness));
-  auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
+//   auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
   auto sensorMat = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
 
   // // //-------------------------------------------------------------// // //
@@ -136,20 +136,20 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Build cylinder for gas.
-  Tube envelopeS(  vessel_inner_r,
-                   vessel_outer_r,
-                   vessel_length);
+  Tube envelopeS(  vessel_inner_r - vessel_wall_thickness,
+                   vessel_outer_r - vessel_wall_thickness,
+                   vessel_length/2.);
   Volume barrel_cells_envelope (detName+"_envelope", envelopeS, desc.material("Air") );
   barrel_cells_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
 
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Use truncated pyramid for barrel cells
-  double angle_hex = atan( 2*hexagon_side_length / vessel_outer_r );
+  double angle_hex = 2*asin( hex_apothem_length / vessel_outer_r );
   std::vector<double> zplanes = { vessel_inner_r, vessel_outer_r*cos(angle_hex) };
-  std::vector<double> rs = { 0.895*hexagon_side_length, 0.955*hexagon_side_length };
+  std::vector<double> rs = { hex_apothem_length -1*mm, hex_apothem_length-1*mm };
   /// Hexagonal truncated pyramid
-  Polyhedra cell_shape("mypyramid", 6, 30 * deg, 360 * deg, zplanes, rs);
+  Polyhedra cell_shape("cellShape", 6, 30 * deg, 360 * deg, zplanes, rs);
   /// rotation of 90deg around Y axis, to align Z axis of pyramid with X axis of cylinder
   Transform3D pyramidTr(RotationZYX(0, -90. * deg, 0. * deg), Translation3D(0, 0, 0));
 
@@ -258,8 +258,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             throw std::runtime_error("Ilegal parameters: center_of_sphere_z not provided");
           if (-999. == radius_of_sphere)
             throw std::runtime_error("Ilegal parameters: radius_of_sphere not provided");
-          if (radius_of_sphere <= thickness_sphere)
-            throw std::runtime_error("Ilegal parameters: radius_of_sphere <= thickness_sphere");
+          if (radius_of_sphere <= mirrorThickness)
+            throw std::runtime_error("Ilegal parameters: radius_of_sphere <= mirrorThickness");
 
           if (-999. == center_of_sensor_x)
             throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
@@ -277,7 +277,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         }
 
         // create the semi-sphere that will result in the mirror
-        Sphere mirrorShapeFull(radius_of_sphere - thickness_sphere,
+        Sphere mirrorShapeFull(radius_of_sphere - mirrorThickness,
                                radius_of_sphere,
                                0.,
                                3.14 / 2);
@@ -479,8 +479,8 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
     Box sensorSol(sensor_sidex / 2, sensor_sidey / 2, sensor_thickness / 2);
     Volume sensorVol(detName + "_sensor", sensorSol, desc.material("SiliconOptical"));
     sensorVol.setSensitiveDetector(sens);
-    SkinSurface sensorSkin(desc, det, "sensor_optical_surface", sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
-    sensorSkin.isValid();
+//     SkinSurface sensorSkin(desc, det, "sensor_optical_surface", sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
+//     sensorSkin.isValid();
 
     // Build the mirror for ncell=1..18
     std::vector<int> ncell_vector = {-2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18,
@@ -488,7 +488,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
       // std::vector<int> ncell_vector = { /*-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13, -14,-15,-16,-17,-18,*/
       //                                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
       //                                 };
-      ncell_vector = {17};
+//       ncell_vector = {17};
 
       /// Dummy counter to place elements inside the barrel
       int cellCounter(0);
@@ -639,3 +639,5 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
   det.setPlacement(vesselPV);
   return det;
 }
+
+DECLARE_DETELEMENT(ARCBARREL_LEGACY_T, create_barrel)
