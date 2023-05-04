@@ -351,7 +351,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor /*ncell.row*20*deg*/),
                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
       PlacedVolume sensorPV = cellV.placeVolume(sensorVol, sensorTr);
-      sensorPV.addPhysVolID("module", 6 * cellCounter+2);
+      sensorPV.addPhysVolID("cellnumber", 6 * cellCounter+2);
       ofile_sensor_pos  << 6 * cellCounter+2 << '\t'
                          << ncell.RID << '\t'
                          << ncell.isReflected << '\t'
@@ -363,7 +363,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       sensorDE.setPlacement(sensorPV);
 
       PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
-//       cellPV.addPhysVolID("module", 6*cellCounter + 0);
+//       cellPV.addPhysVolID("cellnumber", 6*cellCounter + 0);
       cellDE.setPlacement( cellPV );
 
       if (ncell.isReflected)
@@ -388,7 +388,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         Transform3D sensorTr_reflected(RotationZYX(-alpha + 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor),
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         PlacedVolume sensor_ref_PV = cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
-        sensor_ref_PV.addPhysVolID("module", 6 * cellCounter+5);
+        sensor_ref_PV.addPhysVolID("cellnumber", 6 * cellCounter+5);
 //         DetElement sensor_ref_DE(cell_reflected_DE, create_part_name_ff("sensor") + "_ref_DE", 6 * cellCounter+5 );
 //         sensor_ref_DE.setType("tracker");
 //         sensor_ref_DE.setPlacement(sensor_ref_PV);
@@ -401,7 +401,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                     << phin << '\n';
 
         PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
-//         cell_ref_PV.addPhysVolID("module", 6*cellCounter + 3);
+//         cell_ref_PV.addPhysVolID("cellnumber", 6*cellCounter + 3);
         cell_reflected_DE.setPlacement( cell_ref_PV );
       }
     } //-- end loop for sector
@@ -409,7 +409,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   Transform3D envelopeTr(RotationZYX(0,0,0), Translation3D(0, 0, 220*cm));
   PlacedVolume envelopePV = motherVol.placeVolume(barrel_cells_envelope, envelopeTr);
-  envelopePV.addPhysVolID("system", 0);
+  envelopePV.addPhysVolID("system", detID);
   det.setPlacement(envelopePV);
 
   return det;
