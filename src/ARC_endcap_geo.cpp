@@ -58,7 +58,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
 //   double vessel_outer_r = 190 * cm;
 //   double vessel_inner_r = 30.2 * cm;
-  double vessel_outer_r = 220 * cm;
+  double vessel_outer_r = 210 * cm;
   double vessel_inner_r = 25 * cm;
   double vessel_length = 20 * cm;
   double vessel_wall_thickness = 1.0 * cm;
@@ -224,7 +224,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // Build cylinder for gas.
   Tube envelopeS(  vessel_inner_r,
                    vessel_outer_r,
-                   vessel_length);
+                   vessel_length/2);
   Volume barrel_cells_envelope (detName+"_envelope", envelopeS, desc.material("Air") );
   barrel_cells_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
 
