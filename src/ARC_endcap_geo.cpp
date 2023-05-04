@@ -407,10 +407,29 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     } //-- end loop for sector
   }   //-- end loop for endcap
 
-  Transform3D envelopeTr(RotationZYX(0,0,0), Translation3D(0, 0, 220*cm));
-  PlacedVolume envelopePV = motherVol.placeVolume(barrel_cells_envelope, envelopeTr);
-  envelopePV.addPhysVolID("system", detID);
-  det.setPlacement(envelopePV);
+  double zpos_endcap = 220*cm;
+
+  Assembly endcaps_assemblyV("endcaps_assemblyV");
+
+  Transform3D endcapZPos_Tr(RotationZYX(0,0,0), Translation3D(0, 0, zpos_endcap));
+  PlacedVolume endcapZPos_PV = endcaps_assemblyV.placeVolume(barrel_cells_envelope, endcapZPos_Tr);
+  endcapZPos_PV.addPhysVolID("barrel", 1);
+
+  DetElement endcapZPos_DE(det, "endcapZPos_DE", 0 );
+  endcapZPos_DE.setPlacement(endcapZPos_PV);
+
+
+  Transform3D envelope_zreflected_Tr(RotationZYX(0,0,0), Translation3D(0, 0, -zpos_endcap));
+  PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(barrel_cells_envelope.reflect(sens), envelope_zreflected_Tr);
+  endcapZNeg_PV.addPhysVolID("barrel", -1);
+
+  DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 1 );
+  endcapZNeg_DE.setPlacement(endcapZNeg_PV);
+
+
+  PlacedVolume endcaps_PV = motherVol.placeVolume(endcaps_assemblyV);
+  endcaps_PV.addPhysVolID("system", detID);
+  det.setPlacement(endcaps_PV);
 
   return det;
 }
