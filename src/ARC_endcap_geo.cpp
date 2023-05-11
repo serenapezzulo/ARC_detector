@@ -177,7 +177,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   /// Distance in phi angle between complete sectors
   double phistep = 60 * deg;
   /// number of repetition of sectors
-  int phinmax = 1; // 6;
+  int phinmax = 6; // 6;
 
 
   // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -247,7 +247,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   // Build cells of a sector
   // auto ncell = mycell_v[0];
-  mycell_v = {mycell_v[15]};
+//   mycell_v = {mycell_v[15]};
   int cellCounter = 0;
   std::ofstream ofile_sensor_pos("ofile_sensor_pos_endcap.txt");
   for (auto &ncell : mycell_v)
@@ -359,31 +359,31 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-      {
-        Transform3D coolingTrCell(RotationZYX(0, 0, angle_of_sensor ),
-                           Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin-cooling_z_offset));
 
-        Solid coolingSol = IntersectionSolid(cellS, coolingSol_tube, coolingTrCell);
-        std::string coolingName = create_part_name_ff("cooling");
-        /// TODO: change material
-        Volume coolingVol( coolingName , coolingSol, mirrorMat );
-        coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
-        cellV.placeVolume(coolingVol);
-      }
+      Transform3D coolingTrCell(RotationZYX(0, 0, angle_of_sensor ),
+                          Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin-cooling_z_offset));
+
+      Solid coolingSol = IntersectionSolid(cellS, coolingSol_tube, coolingTrCell);
+      std::string coolingName = create_part_name_ff("cooling");
+      /// TODO: change material
+      Volume coolingVol( coolingName , coolingSol, mirrorMat );
+      coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
+      cellV.placeVolume(coolingVol);
+
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-      {
-        Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
-                           Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin+aerogel_z_offset));
 
-        Solid aerogelSol = IntersectionSolid(cellS, aerogelSol_tube, aerogelTrCell);
-        std::string aerogelName = create_part_name_ff("aerogel");
-        /// TODO: change material
-        Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
-        aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
-        cellV.placeVolume(aerogelVol);
-      }
+      Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
+                          Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin+aerogel_z_offset));
+
+      Solid aerogelSol = IntersectionSolid(cellS, aerogelSol_tube, aerogelTrCell);
+      std::string aerogelName = create_part_name_ff("aerogel");
+      /// TODO: change material
+      Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
+      aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
+      cellV.placeVolume(aerogelVol);
+
 
       // // Place detector in cell
       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor ),
@@ -439,33 +439,11 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-        {
-          Transform3D coolingTrCell(RotationZYX(0, 0, angle_of_sensor ),
-                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin-cooling_z_offset));
-
-          Solid coolingSol = IntersectionSolid(cellS, coolingSol_tube, coolingTrCell);
-          std::string coolingName = create_part_name_ff("cooling_ref");
-          /// TODO: change material
-          Volume coolingVol( coolingName , coolingSol, mirrorMat );
-          coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
-          cellV_reflected.placeVolume(coolingVol);
-
-        }
-        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-        {
-          Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
-                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin+aerogel_z_offset));
-
-          Solid aerogelSol = IntersectionSolid(cellS, aerogelSol_tube, aerogelTrCell);
-          std::string aerogelName = create_part_name_ff("aerogel_ref");
-          /// TODO: change material
-          Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
-          aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
+          cellV_reflected.placeVolume(coolingVol);
           cellV_reflected.placeVolume(aerogelVol);
-        }
+
 
         PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
 //         cell_ref_PV.addPhysVolID("cellnumber", 6*cellCounter + 3);
@@ -486,12 +464,12 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   endcapZPos_DE.setPlacement(endcapZPos_PV);
 
 
-//   Transform3D envelope_zreflected_Tr(RotationZYX(0,0,0), Translation3D(0, 0, -zpos_endcap));
-//   PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(barrel_cells_envelope.reflect(sens), envelope_zreflected_Tr);
-//   endcapZNeg_PV.addPhysVolID("barrel", -1);
-//
-//   DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 1 );
-//   endcapZNeg_DE.setPlacement(endcapZNeg_PV);
+  Transform3D envelope_zreflected_Tr(RotationZYX(0,0,0), Translation3D(0, 0, -zpos_endcap));
+  PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(barrel_cells_envelope.reflect(sens), envelope_zreflected_Tr);
+  endcapZNeg_PV.addPhysVolID("barrel", -1);
+
+  DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 1 );
+  endcapZNeg_DE.setPlacement(endcapZNeg_PV);
 
 
   PlacedVolume endcaps_PV = motherVol.placeVolume(endcaps_assemblyV);
