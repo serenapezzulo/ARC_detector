@@ -241,6 +241,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   double cooling_z_offset =   sensor_thickness  + cooling_thickness;
   Tube coolingSol_tube(0, 1.5*hexagon_side_length, cooling_thickness);
 
+  // Build aerogel plate
+  double aerogel_z_offset =   sensor_thickness  + aerogel_thickness;
+  Tube aerogelSol_tube(0, 1.5*hexagon_side_length, aerogel_thickness);
+
   // Build cells of a sector
   // auto ncell = mycell_v[0];
   mycell_v = {mycell_v[15]};
@@ -365,8 +369,22 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         Volume coolingVol( coolingName , coolingSol, mirrorMat );
         coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
         cellV.placeVolume(coolingVol);
-
       }
+      // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+      // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+      // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+      {
+        Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
+                           Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin+aerogel_z_offset));
+
+        Solid aerogelSol = IntersectionSolid(cellS, aerogelSol_tube, aerogelTrCell);
+        std::string aerogelName = create_part_name_ff("aerogel");
+        /// TODO: change material
+        Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
+        aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
+        cellV.placeVolume(aerogelVol);
+      }
+
       // // Place detector in cell
       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor ),
                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
@@ -434,7 +452,20 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
           cellV_reflected.placeVolume(coolingVol);
 
         }
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+        {
+          Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
+                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin+aerogel_z_offset));
 
+          Solid aerogelSol = IntersectionSolid(cellS, aerogelSol_tube, aerogelTrCell);
+          std::string aerogelName = create_part_name_ff("aerogel_ref");
+          /// TODO: change material
+          Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
+          aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
+          cellV_reflected.placeVolume(aerogelVol);
+        }
 
         PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
 //         cell_ref_PV.addPhysVolID("cellnumber", 6*cellCounter + 3);
