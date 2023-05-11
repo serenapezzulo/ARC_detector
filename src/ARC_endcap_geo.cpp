@@ -389,9 +389,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         PlacedVolume sensor_ref_PV = cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
         sensor_ref_PV.addPhysVolID("cellnumber", 6 * cellCounter+5);
-//         DetElement sensor_ref_DE(cell_reflected_DE, create_part_name_ff("sensor") + "_ref_DE", 6 * cellCounter+5 );
-//         sensor_ref_DE.setType("tracker");
-//         sensor_ref_DE.setPlacement(sensor_ref_PV);
+        DetElement sensor_ref_DE(cell_reflected_DE, create_part_name_ff("sensor") + "_ref_DE", 6 * cellCounter+5 );
+        sensor_ref_DE.setPlacement(sensor_ref_PV);
 
         ofile_sensor_pos  << 6 * cellCounter+5 << '\t'
                     << ncell.RID << '\t'
