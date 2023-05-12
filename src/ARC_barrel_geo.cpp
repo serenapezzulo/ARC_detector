@@ -115,28 +115,25 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // //          LIGHT SENSOR PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
+  //default values
   double sensor_sidex     = 8 * cm;
   double sensor_sidey     = 8 * cm;
   double sensor_thickness = 0.2 * cm;
   // empirical distance to keep the sensor inside the cell volume
   double sensor_z_safe_distance = 1.25*mm;
   double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness + sensor_z_safe_distance;
-  auto sensorMat = desc.material("Silicon");
+  auto sensorMat = desc.material("SiliconOptical");
   auto sensorVis = desc.visAttributes("no_vis");
   // auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
-  // - sensor module
-  try
+
+  // Read from xml the parameters for the sensor module
   {
     auto sensorElem  = detElem.child(_Unicode(sensors)).child(_Unicode(module));
     sensor_sidex     = sensorElem.attr<double>(_Unicode(sensor_side_Phi));
-    sensor_sidey     = sensorElem.attr<double>(_Unicode(sensorY));
+    sensor_sidey     = sensorElem.attr<double>(_Unicode(sensor_side_Z));
     sensor_thickness = sensorElem.attr<double>(_Unicode(thickness));
     sensorMat        = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
     sensorVis        = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
-  }
-  catch(std::runtime_error& e)
-  {
-    std::cerr << "\tError reading sensor parameters from xml file. " << e.what() << "\n";
   }
   // // //-------------------------------------------------------------// // //
 
