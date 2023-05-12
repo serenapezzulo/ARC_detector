@@ -24,6 +24,7 @@ using namespace dd4hep;
 // using namespace dd4hep::rec;
 // using dd4hep::SubtractionSolid;
 
+constexpr int BARREL_VERBOSE = 1;
 
 #include "ARC_par_reader.hpp"
 
@@ -76,7 +77,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //         COOLING PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double cooling_radial_thickness = 0.5 * cm;
+  double cooling_radial_thickness = 1.0 * cm;
   // // //-------------------------------------------------------------// // //
 
 
@@ -99,14 +100,14 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //          MIRROR PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-//   double mirror_diameter_safe_shrink = 1*mm;
   auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
   auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
   auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
   double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
-  double mirror_z_safe_shrink = 1*mm;
+  // if this z shrink is not applied, the upper tip of the mirrors are _Curvature
+  // TODO: crosscheck with Martin distances between mirrors and sensors
+  double mirror_z_safe_shrink = 6*mm;
   double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm  - mirrorThickness - mirror_z_safe_shrink;
-  //   auto mirrorSurf = surfMgr.opticalSurface("MirrorSurface");
   // // //-------------------------------------------------------------// // //
 
 
@@ -114,39 +115,52 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // //          LIGHT SENSOR PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double sensor_sidex = 8 * cm;
-  double sensor_sidey = 8 * cm;
+  double sensor_sidex     = 8 * cm;
+  double sensor_sidey     = 8 * cm;
   double sensor_thickness = 0.2 * cm;
   double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness;
+  auto sensorMat = desc.material("Silicon");
+  auto sensorVis = desc.visAttributes("no_vis");
+  // auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
   // - sensor module
-  auto sensorElem = detElem.child(_Unicode(sensors)).child(_Unicode(module));
-  auto sensorVis = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
-  //   double sensorX = sensorElem.attr<double>(_Unicode(sensorX));
-  //   double sensorY = sensorElem.attr<double>(_Unicode(sensorY));
-  //   double sensorThickness = sensorElem.attr<double>(_Unicode(thickness));
-//   auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
-  auto sensorMat = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
-
+  try
+  {
+    auto sensorElem  = detElem.child(_Unicode(sensors)).child(_Unicode(module));
+    sensor_sidex     = sensorElem.attr<double>(_Unicode(sensor_side_Phi));
+    sensor_sidey     = sensorElem.attr<double>(_Unicode(sensorY));
+    sensor_thickness = sensorElem.attr<double>(_Unicode(thickness));
+    sensorMat        = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
+    sensorVis        = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
+  }
+  catch(std::runtime_error& e)
+  {
+    std::cerr << "\tError reading sensor parameters from xml file. " << e.what() << "\n";
+  }
   // // //-------------------------------------------------------------// // //
 
 
 
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
-  // // //++++++++++++  BUILD VESSEL, CELL AND SENOR VOLUMES ++++++++++// // //
+  // // //+++++++++++  BUILD VESSEL, CELL AND SENSOR VOLUMES ++++++++++// // //
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Build cylinder for gas.
-  Tube envelopeS(  vessel_inner_r - vessel_wall_thickness,
+  Tube gasenvelopeS(  vessel_inner_r + vessel_wall_thickness,
                    vessel_outer_r - vessel_wall_thickness,
                    vessel_length/2.);
-  Volume barrel_cells_envelope (detName+"_envelope", envelopeS, desc.material("Air") );
-  barrel_cells_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
-
+  Volume barrel_cells_gas_envelope (detName+"_gasEnvelope", gasenvelopeS, gasvolMat );
+  barrel_cells_gas_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
+  Tube vesselEnvelopeSolid(  vessel_inner_r ,
+                             vessel_outer_r ,
+                             vessel_length/2.);
+  Volume barrel_cells_vessel_envelope (detName+"_vesselEnvelope", vesselEnvelopeSolid, vesselMat );
+  barrel_cells_vessel_envelope.setVisAttributes( vesselVis );
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Use truncated pyramid for barrel cells
   double angle_hex = 2*asin( hex_apothem_length / vessel_outer_r );
-  std::vector<double> zplanes = { vessel_inner_r, vessel_outer_r*cos(angle_hex) };
+  std::vector<double> zplanes = { vessel_inner_r + vessel_wall_thickness,
+                                 (vessel_outer_r - vessel_wall_thickness)*cos(angle_hex) };
   std::vector<double> rs = { hex_apothem_length -1*mm, hex_apothem_length-1*mm };
   /// Hexagonal truncated pyramid
   Polyhedra cell_shape("cellShape", 6, 30 * deg, 360 * deg, zplanes, rs);
@@ -205,7 +219,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
           fullName += std::to_string(ncell);
           fullName += "_ref" + std::to_string(reflect_parameters);
           fullName += "_phi" +  std::to_string(phin);
-          std::cout << "\tNew name: " << fullName << std::endl;
+          if(BARREL_VERBOSE)
+            std::cout << "\tNew name: " << fullName << std::endl;
           return fullName;
         };
 
@@ -320,7 +335,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
         {
           double cooling_z_offset =   sensor_thickness  + cooling_radial_thickness;
-          Tube coolingSol_tube(0, 1.5*hexagon_side_length, cooling_radial_thickness);
+          Tube coolingSol_tube(0, 1.5*hexagon_side_length, cooling_radial_thickness/2.);
           Transform3D coolingTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin+cooling_z_offset, 0, center_of_sensor_x));
           auto coolingTrCell = RotationZYX(0, 90. * deg, 0. * deg)*coolingTr;
           Solid coolingSol = IntersectionSolid(cell_shape, coolingSol_tube, coolingTrCell);
@@ -358,7 +373,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 
         auto cellTr = RotationZ(phistep * phin + phi_offset) * Translation3D(0, 0, mirror_abs_pos_z)*pyramidTr ;
-        PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellVol, cellTr);
+        PlacedVolume cellPV = barrel_cells_gas_envelope.placeVolume(cellVol, cellTr);
         cellDE.setPlacement(cellPV);
 
 
@@ -370,7 +385,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
-    PlacedVolume assemblyPV = motherVol.placeVolume(barrel_cells_envelope);
+    barrel_cells_vessel_envelope.placeVolume(barrel_cells_gas_envelope);
+    PlacedVolume assemblyPV = motherVol.placeVolume(barrel_cells_vessel_envelope);
     assemblyPV.addPhysVolID("system", detID);
     det.setPlacement(assemblyPV);
     return det;
