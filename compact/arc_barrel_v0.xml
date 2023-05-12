@@ -133,11 +133,11 @@
       offset_x="-0.5*(SENSOR_NStripsX-1)*SENSOR_pitchX"
       offset_y="-0.5*(SENSOR_NStripsY-1)*SENSOR_pitchY"
       />
-      <id>system:8,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
+      <id>system:5,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
   </readout>
   <readout name="ARC_HITS">
       <segmentation type="CartesianGridXY" grid_size_x="SENSOR_X" grid_size_y="SENSOR_Y" />
-      <id>system:8,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
+      <id>system:5,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
   </readout>
 
 </readouts>
