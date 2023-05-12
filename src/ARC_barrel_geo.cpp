@@ -152,7 +152,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   barrel_cells_gas_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
   Tube vesselEnvelopeSolid(  vessel_inner_r ,
                              vessel_outer_r ,
-                             vessel_length/2.);
+                             vessel_length/2. + vessel_wall_thickness);
   Volume barrel_cells_vessel_envelope (detName+"_vesselEnvelope", vesselEnvelopeSolid, vesselMat );
   barrel_cells_vessel_envelope.setVisAttributes( vesselVis );
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
