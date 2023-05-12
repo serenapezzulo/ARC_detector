@@ -17,14 +17,9 @@
 #include "DD4hep/DetFactoryHelper.h"
 #include "DD4hep/OpticalSurfaces.h"
 #include "DD4hep/Printout.h"
-#include "DDRec/DetectorData.h"
-#include <XML/Helper.h>
 
 using namespace dd4hep;
-// using namespace dd4hep::rec;
-// using dd4hep::SubtractionSolid;
 
-constexpr int BARREL_VERBOSE = 1;
 
 #include "ARC_par_reader.hpp"
 
@@ -218,8 +213,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
           fullName += std::to_string(ncell);
           fullName += "_ref" + std::to_string(reflect_parameters);
           fullName += "_phi" +  std::to_string(phin);
-          if(BARREL_VERBOSE)
-            std::cout << "\tNew name: " << fullName << std::endl;
+          dd4hep::printout(dd4hep::DEBUG,"ARCBARREL_T", "+++ New name:%s",fullName.c_str());
           return fullName;
         };
 
