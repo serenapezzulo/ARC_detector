@@ -104,7 +104,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
   auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
   double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
-  // if this z shrink is not applied, the upper tip of the mirrors are _Curvature
+  // if this z shrink is not applied, the upper tip of the mirrors are cut
   // TODO: crosscheck with Martin distances between mirrors and sensors
   double mirror_z_safe_shrink = 6*mm;
   double mirror_z_origin_Martin = vessel_outer_r - vessel_wall_thickness - 37 * cm  - mirrorThickness - mirror_z_safe_shrink;
@@ -118,7 +118,9 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   double sensor_sidex     = 8 * cm;
   double sensor_sidey     = 8 * cm;
   double sensor_thickness = 0.2 * cm;
-  double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness;
+  // empirical distance to keep the sensor inside the cell volume
+  double sensor_z_safe_distance = 1.25*mm;
+  double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness + sensor_z_safe_distance;
   auto sensorMat = desc.material("Silicon");
   auto sensorVis = desc.visAttributes("no_vis");
   // auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
