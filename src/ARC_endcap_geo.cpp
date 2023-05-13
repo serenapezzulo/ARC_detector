@@ -17,14 +17,8 @@
 #include "DD4hep/DetFactoryHelper.h"
 #include "DD4hep/OpticalSurfaces.h"
 #include "DD4hep/Printout.h"
-#include "DDRec/DetectorData.h"
-#include <XML/Helper.h>
 
 using namespace dd4hep;
-using namespace dd4hep::rec;
-using dd4hep::SubtractionSolid;
-
-#include <string>
 
 
 #include "ARC_par_reader.hpp"
@@ -56,10 +50,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //          VESSEL PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-//   double vessel_outer_r = 190 * cm;
-//   double vessel_inner_r = 30.2 * cm;
-  double vessel_outer_r = 210 * cm;
-  double vessel_inner_r = 25 * cm;
+  double vessel_outer_r = 210 * cm; // 190 * cm;
+  double vessel_inner_r = 25 * cm;  // 30.2 * cm;
   double vessel_length = 20 * cm;
   double vessel_wall_thickness = 1.0 * cm;
   if (vessel_outer_r <= vessel_inner_r)
@@ -190,24 +182,30 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
   // // //-------------------------------------------------------------// // //
 
-  // // // // // // // // // // // // // // // // // // // // // // // // // //
-  // // // // // //          LIGHT SENSOR PARAMETERS          // // // // // //
-  // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double sensor_sidex = 8 * cm;
-  double sensor_sidey = 8 * cm;
-  double sensor_thickness = 0.2 * cm;
-  double sensor_z_origin_Martin = -vessel_length / 2. + vessel_wall_thickness + 0.5 * cooling_thickness;
-  // - sensor module
-  auto sensorElem = detElem.child(_Unicode(sensors)).child(_Unicode(module));
-  auto sensorVis = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
-  //   double sensorX = sensorElem.attr<double>(_Unicode(sensorX));
-  //   double sensorY = sensorElem.attr<double>(_Unicode(sensorY));
-  //   double sensorThickness = sensorElem.attr<double>(_Unicode(thickness));
-  auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
-  auto sensorMat = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
 
-  // // //-------------------------------------------------------------// // //
+    // // // // // // // // // // // // // // // // // // // // // // // // // //
+    // // // // // //          LIGHT SENSOR PARAMETERS          // // // // // //
+    // // // // // // // // // // // // // // // // // // // // // // // // // //
+    //default values
+    double sensor_sidex     = 8 * cm;
+    double sensor_sidey     = 8 * cm;
+    double sensor_thickness = 0.2 * cm;
+    // empirical distance to keep the sensor inside the cell volume
+    double sensor_z_origin_Martin = -vessel_length / 2. + vessel_wall_thickness + 0.5 * cooling_thickness;
+    auto sensorMat = desc.material("SiliconOptical");
+    auto sensorVis = desc.visAttributes("no_vis");
+    // auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
 
+    // Read from xml the parameters for the sensor module
+    {
+        auto sensorElem  = detElem.child(_Unicode(sensors)).child(_Unicode(module));
+        sensor_sidex     = sensorElem.attr<double>(_Unicode(sensor_side_Phi));
+        sensor_sidey     = sensorElem.attr<double>(_Unicode(sensor_side_Z));
+        sensor_thickness = sensorElem.attr<double>(_Unicode(thickness));
+        sensorMat        = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
+        sensorVis        = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
+    }
+    // // //-------------------------------------------------------------// // //
 
 
   // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
@@ -270,7 +268,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
           std::string fullName = detName + "_" + partName;
           fullName += std::to_string(ncell.RID);
           fullName += "_phi" +  std::to_string(phin);
-          std::cout << "\tNew name: " << fullName << std::endl;
+          dd4hep::printout(dd4hep::DEBUG,"ARCENDCAP_T", "+++ New name:%s",fullName.c_str());
           return fullName;
         };
 
@@ -338,7 +336,6 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         alpha += 180 * deg;
       double dx = center_of_sphere_x * cos(alpha);
       double dy = center_of_sphere_x * sin(alpha);
-//       std::cout << ncell.RID << '\t' << center_of_sphere_x << '\t' << alpha / rad * deg << std::endl;
 
       /// 3D transformation of mirrorVolFull in order to place it inside the gas volume
       Transform3D mirrorTr(RotationZYX(0, 0, 0), Translation3D(dx, dy, center_of_sphere_z));
