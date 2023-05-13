@@ -74,23 +74,20 @@
     id="1"
     name="ARCBARREL"
     type="ARCBARREL_T"
-    gas_material="C4F10_PFRICH"
-    gas_vis="gas_vis"
-    vessel_material="Aluminum"
-    vessel_vis="vessel_vis"
     readout="ARC_HITS"
     >
-    <comment> 
-      The gas thickness = vessel_outer_r 
-                        - vessel_inner_r 
-                        - 2*vessel_wall_thickness
-    </comment>
-    <dimensions
-      vessel_length="30*cm"
-      vessel_inner_r="10*cm"
-      vessel_outer_r="30*cm"
-      vessel_wall_thickness="VESSEL_WALL_THICKNESS"
-      />
+  <!-- /detectors/detector/vessel -->
+  <vessel
+      material="Aluminum"
+      vis="vessel_vis"
+    >
+  </vessel>
+  <!-- /detectors/detector/radiatorgas -->
+  <radiatorgas
+      material="C4F10_PFRICH"
+      vis="gas_vis"
+    >
+  </radiatorgas>
   <!-- /detectors/detector/sensors -->
   <sensors>
     <!-- /detectors/detector/sensors/module -->

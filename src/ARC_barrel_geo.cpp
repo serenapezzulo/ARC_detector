@@ -37,10 +37,13 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     DetElement det(detName, detID);
     sens.setType("tracker");
 
-    auto vesselMat = desc.material(detElem.attr<std::string>(_Unicode(vessel_material)));
-    auto gasvolMat = desc.material(detElem.attr<std::string>(_Unicode(gas_material)));
-    auto vesselVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(vessel_vis)));
-    auto gasvolVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(gas_vis)));
+    auto gasElem    = detElem.child(_Unicode(radiatorgas));
+    auto gasvolMat  = desc.material(gasElem.attr<std::string>(_Unicode(material)));
+    auto gasvolVis  = desc.visAttributes(gasElem.attr<std::string>(_Unicode(vis)));
+
+    auto vesselElem = detElem.child(_Unicode(vessel));
+    auto vesselMat  = desc.material(vesselElem.attr<std::string>(_Unicode(material)));
+    auto vesselVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(vis)));
 
     // read Martin file and store parameters by name in the map
     fill_cell_parameters_m();
