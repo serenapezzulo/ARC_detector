@@ -208,23 +208,22 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // //-------------------------------------------------------------// // //
 
 
-  // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
-  // // //++++++++++++  BUILD VESSEL, CELL AND SENOR VOLUMES ++++++++++// // //
-  // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
+    // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
+    // // //+++++++++++  BUILD VESSEL, CELL AND SENSOR VOLUMES ++++++++++// // //
+    // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
-  // Build cylinder for gas.
-//   Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
-//                    vessel_outer_r - vessel_wall_thickness,
-//                    vessel_length);
-//   Volume gasvolVol( detName + "_envelope", gasvolSolid, desc.material("Air") );
-
-
-  // Build cylinder for gas.
-  Tube envelopeS(  vessel_inner_r,
-                   vessel_outer_r,
-                   vessel_length/2);
-  Volume barrel_cells_envelope (detName+"_envelope", envelopeS, desc.material("Air") );
-  barrel_cells_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
+    // Build cylinder for gas, and the vessel for the gas
+    Tube gasenvelopeS(  vessel_inner_r + vessel_wall_thickness,
+                        vessel_outer_r - vessel_wall_thickness,
+                        vessel_length/2.);
+    Volume endcap_cells_gas_envelope (detName+"_gasEnvelope", gasenvelopeS, gasvolMat );
+    endcap_cells_gas_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
+    Tube vesselEnvelopeSolid(  vessel_inner_r,
+                               vessel_outer_r,
+                               vessel_length/2. + vessel_wall_thickness);
+    Volume endcap_cells_vessel_envelope (detName+"_vesselEnvelope", vesselEnvelopeSolid, vesselMat );
+    endcap_cells_vessel_envelope.setVisAttributes( vesselVis );
+    // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Use regular polyhedra for endcaps cells
   PolyhedraRegular cellS(6, 0, 0., hexagon_apothem, vessel_length);
@@ -397,7 +396,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       sensorDE.setType("tracker");
       sensorDE.setPlacement(sensorPV);
 
-      PlacedVolume cellPV = barrel_cells_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
+      PlacedVolume cellPV = endcap_cells_gas_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
 //       cellPV.addPhysVolID("cellnumber", 6*cellCounter + 0);
       cellDE.setPlacement( cellPV );
 
@@ -442,19 +441,22 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
           cellV_reflected.placeVolume(aerogelVol);
 
 
-        PlacedVolume cell_ref_PV = barrel_cells_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
+        PlacedVolume cell_ref_PV = endcap_cells_gas_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
 //         cell_ref_PV.addPhysVolID("cellnumber", 6*cellCounter + 3);
         cell_reflected_DE.setPlacement( cell_ref_PV );
       }
     } //-- end loop for sector
   }   //-- end loop for endcap
 
+  endcap_cells_vessel_envelope.placeVolume(endcap_cells_gas_envelope);
+
+
   double zpos_endcap = 220*cm;
 
   Assembly endcaps_assemblyV("endcaps_assemblyV");
 
   Transform3D endcapZPos_Tr(RotationZYX(0,0,0), Translation3D(0, 0, zpos_endcap));
-  PlacedVolume endcapZPos_PV = endcaps_assemblyV.placeVolume(barrel_cells_envelope, endcapZPos_Tr);
+  PlacedVolume endcapZPos_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope, endcapZPos_Tr);
   endcapZPos_PV.addPhysVolID("barrel", 1);
 
   DetElement endcapZPos_DE(det, "endcapZPos_DE", 0 );
@@ -462,7 +464,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 
   Transform3D envelope_zreflected_Tr(RotationZYX(0,0,0), Translation3D(0, 0, -zpos_endcap));
-  PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(barrel_cells_envelope.reflect(sens), envelope_zreflected_Tr);
+  PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope.reflect(sens), envelope_zreflected_Tr);
   endcapZNeg_PV.addPhysVolID("barrel", -1);
 
   DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 1 );
