@@ -61,12 +61,12 @@
   <constant name="SENSOR_Y"               value="8.0*cm"    />
   <constant name="SENSOR_NStripsX"        value="100"       />
   <constant name="SENSOR_NStripsY"        value="100"       />
-  <constant name="SENSOR_pitchX"          value="0.08*cm" />
-  <constant name="SENSOR_pitchY"          value="0.08*cm" />
+  <constant name="SENSOR_pitchX"          value="0.08*cm"   />
+  <constant name="SENSOR_pitchY"          value="0.08*cm"   />
   <constant name="MIRROR_THICKNESS"       value="0.2*cm"    />
-  <constant name="MIRROR_RADIUS"          value="36.9*cm"   />
   <constant name="COOLING_THICKNESS"      value="0.5*cm"    />
   <constant name="AEROGEL_THICKNESS"      value="1.0*cm"    />
+  <constant name="ARC_ENDCAP_ZPOS"        value="220*cm"    />
 </define>
 
 <detectors>
@@ -79,13 +79,8 @@
     vessel_material="Aluminum"
     vessel_vis="vessel_vis"
     readout="ARC_HITS"
-    zpos = "220 * cm"
+    zpos = "ARC_ENDCAP_ZPOS"
     >
-    <comment> 
-      The gas thickness = vessel_outer_r 
-                        - vessel_inner_r 
-                        - 2*vessel_wall_thickness
-    </comment>
     <dimensions
       vessel_length="30*cm"
       vessel_inner_r="10*cm"
@@ -101,15 +96,14 @@
         - `side`:      side length of the square module
         - `thickness`: thickness of the sensor module
       - notes:
-        - the material is `SiliconAirOptical`, to resolve a technical issue with the refractive boundary
+        - the material is `SiliconOptical`, to resolve a technical issue with the refractive boundary
     </comment>
     <module
       material="SiliconOptical"
       vis="sensor_vis"
-      sensor_side_Z="SENSOR_Y"
-      sensor_side_Phi="SENSOR_X"
+      sensor_side_Y="SENSOR_Y"
+      sensor_side_X="SENSOR_X"
       thickness="SENSOR_THICKNESS"
-      surface="SensorSurface_PFRICH"
       />
   </sensors>
   <!-- /detectors/detector/mirror -->
@@ -117,9 +111,7 @@
     <!-- /detectors/detector/mirror/module -->
     <module
       material="Aluminum"
-      vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
-      radius="MIRROR_RADIUS"
       surface="MirrorSurface"
       />
   </mirror>

@@ -195,13 +195,12 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     double sensor_z_origin_Martin = -vessel_length / 2. + vessel_wall_thickness + 0.5 * cooling_thickness;
     auto sensorMat = desc.material("SiliconOptical");
     auto sensorVis = desc.visAttributes("no_vis");
-    // auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
 
     // Read from xml the parameters for the sensor module
     {
         auto sensorElem  = detElem.child(_Unicode(sensors)).child(_Unicode(module));
-        sensor_sidex     = sensorElem.attr<double>(_Unicode(sensor_side_Phi));
-        sensor_sidey     = sensorElem.attr<double>(_Unicode(sensor_side_Z));
+        sensor_sidex     = sensorElem.attr<double>(_Unicode(sensor_side_X));
+        sensor_sidey     = sensorElem.attr<double>(_Unicode(sensor_side_Y));
         sensor_thickness = sensorElem.attr<double>(_Unicode(thickness));
         sensorMat        = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
         sensorVis        = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
