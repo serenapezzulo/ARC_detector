@@ -34,12 +34,15 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   DetElement det(detName, detID);
   sens.setType("tracker");
 
-
-  auto vesselMat = desc.material(detElem.attr<std::string>(_Unicode(vessel_material)));
-  auto gasvolMat = desc.material(detElem.attr<std::string>(_Unicode(gas_material)));
-  auto vesselVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(vessel_vis)));
-  auto gasvolVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(gas_vis)));
   double zpos_endcap = detElem.attr<double>(_Unicode(zpos));//220*cm;
+
+  auto gasElem    = detElem.child(_Unicode(radiatorgas));
+  auto gasvolMat  = desc.material(gasElem.attr<std::string>(_Unicode(material)));
+  auto gasvolVis  = desc.visAttributes(gasElem.attr<std::string>(_Unicode(vis)));
+
+  auto vesselElem = detElem.child(_Unicode(vessel));
+  auto vesselMat  = desc.material(vesselElem.attr<std::string>(_Unicode(material)));
+  auto vesselVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(vis)));
 
 
   // read Martin file and store parameters by name in the map
@@ -177,7 +180,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // //          MIRROR PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   double mirror_z_origin_Martin = vessel_length / 2. - vessel_wall_thickness - 37 * cm;
-  auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
+  auto mirrorElem = detElem.child(_Unicode(mirror));
   double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
   auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
   auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
@@ -198,7 +201,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
     // Read from xml the parameters for the sensor module
     {
-        auto sensorElem  = detElem.child(_Unicode(sensors)).child(_Unicode(module));
+        auto sensorElem  = detElem.child(_Unicode(sensors));
         sensor_sidex     = sensorElem.attr<double>(_Unicode(sensor_side_X));
         sensor_sidey     = sensorElem.attr<double>(_Unicode(sensor_side_Y));
         sensor_thickness = sensorElem.attr<double>(_Unicode(thickness));
