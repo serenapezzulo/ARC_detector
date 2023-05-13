@@ -71,7 +71,7 @@
 
 <detectors>
   <detector
-    id="1"
+    id="2"
     name="ARCENDCAP"
     type="ARCENDCAP_T"
     gas_material="C4F10_PFRICH"
@@ -79,6 +79,7 @@
     vessel_material="Aluminum"
     vessel_vis="vessel_vis"
     readout="ARC_HITS"
+    zpos = "220 * cm"
     >
     <comment> 
       The gas thickness = vessel_outer_r 

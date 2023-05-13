@@ -39,6 +39,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   auto gasvolMat = desc.material(detElem.attr<std::string>(_Unicode(gas_material)));
   auto vesselVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(vessel_vis)));
   auto gasvolVis = desc.visAttributes(detElem.attr<std::string>(_Unicode(gas_vis)));
+  double zpos_endcap = detElem.attr<double>(_Unicode(zpos));//220*cm;
 
 
   // read Martin file and store parameters by name in the map
@@ -451,7 +452,6 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   endcap_cells_vessel_envelope.placeVolume(endcap_cells_gas_envelope);
 
 
-  double zpos_endcap = 220*cm;
 
   Assembly endcaps_assemblyV("endcaps_assemblyV");
 
