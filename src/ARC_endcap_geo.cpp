@@ -20,6 +20,8 @@
 
 using namespace dd4hep;
 
+#define DUMP_SENSOR_POSITIONS
+
 
 #include "ARC_par_reader.hpp"
 
@@ -249,7 +251,9 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // auto ncell = mycell_v[0];
 //   mycell_v = {mycell_v[15]};
   int cellCounter = 0;
+#ifdef DUMP_SENSOR_POSITIONS
   std::ofstream ofile_sensor_pos("ofile_sensor_pos_endcap.txt");
+#endif
   for (auto &ncell : mycell_v)
   {
     // sanity check, skip non initialized cells
@@ -389,12 +393,14 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
       PlacedVolume sensorPV = cellV.placeVolume(sensorVol, sensorTr);
       sensorPV.addPhysVolID("cellnumber", 6 * cellCounter+2);
+#ifdef DUMP_SENSOR_POSITIONS
       ofile_sensor_pos  << 6 * cellCounter+2 << '\t'
                          << ncell.RID << '\t'
                          << ncell.isReflected << '\t'
                          << ncell.x << '\t'
                          << ncell.y << '\t'
                          << phin << '\n';
+#endif
       DetElement sensorDE(cellDE, create_part_name_ff("sensor") + "DE", 6 * cellCounter+2 );
       sensorDE.setType("tracker");
       sensorDE.setPlacement(sensorPV);
@@ -429,12 +435,14 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         DetElement sensor_ref_DE(cell_reflected_DE, create_part_name_ff("sensor") + "_ref_DE", 6 * cellCounter+5 );
         sensor_ref_DE.setPlacement(sensor_ref_PV);
 
+#ifdef DUMP_SENSOR_POSITIONS
         ofile_sensor_pos  << 6 * cellCounter+5 << '\t'
                     << ncell.RID << '\t'
                     << ncell.isReflected << '\t'
                     << ncell.x << '\t'
                     << ncell.y << '\t'
                     << phin << '\n';
+#endif
 
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
