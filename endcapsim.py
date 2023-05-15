@@ -84,7 +84,7 @@ if __name__ == "__main__":
     SIM.compactFile = "./compact/arc_endcap_v0.xml"
 
     # Output file (assuming CWD)
-    SIM.outputFile = "arcsim.root"
+    SIM.outputFile = "arcsime.root"
 
     # Override with user options
     SIM.parseOptions()

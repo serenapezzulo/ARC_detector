@@ -84,7 +84,7 @@ if __name__ == "__main__":
     SIM.compactFile = "./compact/arc_barrel_v0.xml"
 
     # Output file (assuming CWD)
-    SIM.outputFile = "arcsim.root"
+    SIM.outputFile = "arcsimb.root"
 
     # Override with user options
     SIM.parseOptions()
