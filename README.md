@@ -89,11 +89,43 @@ A new canvas will open showing something similar to the following graph:
 
 Hit pattern of photons (and pion) in the detector
 
+
+## Interpreting the cellID
+
+The readout id is a 64 bit field that is specified in the xml file,
+```
+      <id>system:5,barrel:3,cellnumber:24,x:32:-16,y:-16</id>
+```
+
+Each name define a field, which has the corresponding number of bits. System field name identifies if it is ARC barrrel or endcap (or any main sub-detector). Barrel field name identifies if it is barrel (0) or endcap (1,2) of the ARC sub-detector. The cellnumber is just a counter for each cell. Note that for the endcap the numbering repeats, but the barrel field is different. The XY field names corresponds to the sensor segmentation, which is the only sensitive component of this subdetector.
+
+
+To plot the detector ID bit field
+```
+ EVENT->Scan("((ARC_HITS.cellID&0x1F))>>h(100,0,100)")
+```
+
+Similarly, the barrel bitfield can be shown by using the expression `((ARC_HITS.cellID>>5)&0x7)`. It can be read as jumping the first 5 bits (corresponding to the detector ID) and crop the following 3 bits, corresponding to the barrel bitfield. This value can be 0 (barrel) or (1,2) for the endcap.
+
+To plot the cell number (it is just a consecutive number that is assigned to each cell). The expression to be plotted can read as jumping the first 8 bits (corresponding to detector ID + barrel bitfield), and crop the following 24 bits, corresponding to the cell number. The second expression is a condition, to select the events happeing in one endcap, the one at Z>0.
+```
+EVENT->Draw("((ARC_HITS.cellID>>8)&0xFFFFFF)>>hCellN(300,0,300)","((ARC_HITS.cellID>>5)&0x7)==1")
+```
+
 One can inspect the hit pattern in the sensor from the cellID parameters,
 
 ```
 EVENT->Scan("((ARC_HITS.cellID>>32)&0xFFFF):(ARC_HITS.cellID>>48)" )
 ```
+
+or draw the sensor hit pattern just the fifth event
+
+
+```
+ EVENT->Draw("((ARC_HITS.cellID/pow(2,32))&0xFFFF):(ARC_HITS.cellID/pow(2,48))","","colz",1,5)
+```
+
+Note 1: this primitive way of chopping the bitfield can be done using the corresponding DD4hep object.
 
 # Useful links
 
@@ -110,3 +142,4 @@ Example of RICH detector implemented in DD4hep
 
 Documentation of ARC,
 * Dec-22 ARC meeting indico: https://indico.cern.ch/event/1231098/
+* Mar-28 Discussion about ARC implementation in DD4hep: https://indico.cern.ch/event/1266428/
