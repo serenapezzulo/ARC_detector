@@ -122,7 +122,7 @@
 </detectors>
 
 <readouts>
-  <readout name="ARC_HITS_OLD">
+  <readout name="ARC_HITS">
     <segmentation
       type="CartesianGridXY"
       grid_size_x="SENSOR_pitchX"
@@ -132,11 +132,6 @@
       />
       <id>system:5,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
   </readout>
-  <readout name="ARC_HITS">
-      <segmentation type="CartesianGridXY" grid_size_x="SENSOR_X" grid_size_y="SENSOR_Y" />
-      <id>system:5,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
-  </readout>
-
 </readouts>
 
 </lccdd>
