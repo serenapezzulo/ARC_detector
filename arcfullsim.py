@@ -73,8 +73,8 @@ if __name__ == "__main__":
     SIM.enableGun = True
     SIM.gun.energy = "50*GeV"
     SIM.gun.particle = "pi+"
-    #SIM.gun.thetaMin = "90*deg"
-    #SIM.gun.thetaMax = "90.1*deg"
+    SIM.gun.thetaMin = "30*deg"
+    SIM.gun.thetaMax = "150*deg"
     #SIM.gun.phiMin = "0*deg"
     #SIM.gun.phiMax = "240.1*deg"
     SIM.gun.distribution = "uniform"
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     SIM.compactFile = "./compact/arc_full_v0.xml"
 
     # Output file (assuming CWD)
-    SIM.outputFile = "arcsim.root"
+    SIM.outputFile = "arcsim_edm4hep.root"
 
     # Override with user options
     SIM.parseOptions()
@@ -94,8 +94,8 @@ if __name__ == "__main__":
     # Run the simulation
     try:
         SIM.run()
-        if os.path.getsize( SIM.outputFile ) < 5000000 :
-            raise RuntimeError("Output file not found or size less than 5MB")
+        if os.path.getsize( SIM.outputFile ) < 1000000 :
+            raise RuntimeError("Output file not found or size less than 1MB")
         logger.info("TEST: passed")
     except NameError as e:
         logger.fatal("TEST: failed")
