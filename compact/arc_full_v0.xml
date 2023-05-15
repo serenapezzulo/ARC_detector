@@ -69,57 +69,42 @@
   <constant name="AEROGEL_THICKNESS"      value="1.0*cm"    />
 </define>
 
+
 <detectors>
+
   <detector
     id="1"
     name="ARCBARREL"
     type="ARCBARREL_T"
-    gas_material="C4F10_PFRICH"
-    gas_vis="gas_vis"
-    vessel_material="Aluminum"
-    vessel_vis="vessel_vis"
     readout="ARC_HITS"
     >
-    <comment> 
-      The gas thickness = vessel_outer_r 
-                        - vessel_inner_r 
-                        - 2*vessel_wall_thickness
-    </comment>
-    <dimensions
-      vessel_length="30*cm"
-      vessel_inner_r="10*cm"
-      vessel_outer_r="30*cm"
-      vessel_wall_thickness="VESSEL_WALL_THICKNESS"
-      />
+  <!-- /detectors/detector/vessel -->
+  <vessel
+      material="Aluminum"
+      vis="vessel_vis"
+    >
+  </vessel>
+  <!-- /detectors/detector/radiatorgas -->
+  <radiatorgas
+      material="C4F10_PFRICH"
+      vis="gas_vis"
+    >
+  </radiatorgas>
   <!-- /detectors/detector/sensors -->
-  <sensors>
-    <!-- /detectors/detector/sensors/module -->
-    <comment>
-      ##### Sensor module
-      - dimensions:
-        - `side`:      side length of the square module
-        - `thickness`: thickness of the sensor module
-      - notes:
-        - the material is `SiliconAirOptical`, to resolve a technical issue with the refractive boundary
-    </comment>
-    <module
+  <sensors
       material="SiliconOptical"
-      surface="SensorSurface_PFRICH"
       vis="sensor_vis"
       sensor_side_Z="SENSOR_Y"
       sensor_side_Phi="SENSOR_X"
       thickness="SENSOR_THICKNESS"
-      />
+      >
   </sensors>
   <!-- /detectors/detector/mirror -->
-  <mirror>
-    <!-- /detectors/detector/mirror/module -->
-    <module
+  <mirror
       material="Aluminum"
-      vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
       surface="MirrorSurface"
-      />
+      >
   </mirror>
   </detector>
 
@@ -127,60 +112,44 @@
     id="2"
     name="ARCENDCAP"
     type="ARCENDCAP_T"
-    gas_material="C4F10_PFRICH"
-    gas_vis="gas_vis"
-    vessel_material="Aluminum"
-    vessel_vis="vessel_vis"
     readout="ARC_HITS"
+    zpos = "ARC_ENDCAP_ZPOS"
     >
-    <comment>
-      The gas thickness = vessel_outer_r
-                        - vessel_inner_r
-                        - 2*vessel_wall_thickness
-    </comment>
-    <dimensions
-      vessel_length="30*cm"
-      vessel_inner_r="10*cm"
-      vessel_outer_r="30*cm"
-      vessel_wall_thickness="VESSEL_WALL_THICKNESS"
-      />
+  <!-- /detectors/detector/vessel -->
+  <vessel
+      material="Aluminum"
+      vis="vessel_vis"
+    >
+  </vessel>
+  <!-- /detectors/detector/radiatorgas -->
+  <radiatorgas
+      material="C4F10_PFRICH"
+      vis="gas_vis"
+    >
+  </radiatorgas>
+
   <!-- /detectors/detector/sensors -->
-  <sensors>
-    <!-- /detectors/detector/sensors/module -->
-    <comment>
-      ##### Sensor module
-      - dimensions:
-        - `side`:      side length of the square module
-        - `thickness`: thickness of the sensor module
-      - notes:
-        - the material is `SiliconAirOptical`, to resolve a technical issue with the refractive boundary
-    </comment>
-    <module
+  <sensors
       material="SiliconOptical"
       vis="sensor_vis"
-      sensor_side_Z="SENSOR_Y"
-      sensor_side_Phi="SENSOR_X"
+      sensor_side_Y="SENSOR_Y"
+      sensor_side_X="SENSOR_X"
       thickness="SENSOR_THICKNESS"
-      surface="SensorSurface_PFRICH"
-      />
+      >
   </sensors>
   <!-- /detectors/detector/mirror -->
-  <mirror>
-    <!-- /detectors/detector/mirror/module -->
-    <module
+  <mirror
       material="Aluminum"
-      vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
-      radius="MIRROR_RADIUS"
       surface="MirrorSurface"
-      />
+      >
   </mirror>
   </detector>
-
 </detectors>
 
+
 <readouts>
-  <readout name="ARC_HITS_OLD">
+  <readout name="ARC_HITS">
     <segmentation
       type="CartesianGridXY"
       grid_size_x="SENSOR_pitchX"
@@ -190,11 +159,6 @@
       />
       <id>system:5,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
   </readout>
-  <readout name="ARC_HITS">
-      <segmentation type="CartesianGridXY" grid_size_x="SENSOR_X" grid_size_y="SENSOR_Y" />
-      <id>system:5,barrel:3,cellnumber:21,x:32:-16,y:-16</id>
-  </readout>
-
 </readouts>
 
 </lccdd>

@@ -98,7 +98,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // // // // // // // // // // // // // // // // // // // // // // // //
     // // // // // // // //          MIRROR PARAMETERS          // // // // // //
     // // // // // // // // // // // // // // // // // // // // // // // // // //
-    auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
+    auto mirrorElem = detElem.child(_Unicode(mirror));
     auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
     auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
     double mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
@@ -126,7 +126,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
     // Read from xml the parameters for the sensor module
     {
-        auto sensorElem  = detElem.child(_Unicode(sensors)).child(_Unicode(module));
+        auto sensorElem  = detElem.child(_Unicode(sensors));
         sensor_sidex     = sensorElem.attr<double>(_Unicode(sensor_side_Phi));
         sensor_sidey     = sensorElem.attr<double>(_Unicode(sensor_side_Z));
         sensor_thickness = sensorElem.attr<double>(_Unicode(thickness));

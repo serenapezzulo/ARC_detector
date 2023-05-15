@@ -89,34 +89,20 @@
     >
   </radiatorgas>
   <!-- /detectors/detector/sensors -->
-  <sensors>
-    <!-- /detectors/detector/sensors/module -->
-    <comment>
-      ##### Sensor module
-      - dimensions:
-        - `side`:      side length of the square module
-        - `thickness`: thickness of the sensor module
-      - notes:
-        - the material is `SiliconAirOptical`, to resolve a technical issue with the refractive boundary
-    </comment>
-    <module
+  <sensors
       material="SiliconOptical"
-      surface="SensorSurface_PFRICH"
       vis="sensor_vis"
       sensor_side_Z="SENSOR_Y"
       sensor_side_Phi="SENSOR_X"
       thickness="SENSOR_THICKNESS"
-      />
+      >
   </sensors>
   <!-- /detectors/detector/mirror -->
-  <mirror>
-    <!-- /detectors/detector/mirror/module -->
-    <module
+  <mirror
       material="Aluminum"
-      vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
       surface="MirrorSurface"
-      />
+      >
   </mirror>
   </detector>
 </detectors>
