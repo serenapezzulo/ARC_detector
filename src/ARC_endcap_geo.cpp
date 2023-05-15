@@ -473,8 +473,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   endcapZPos_DE.setPlacement(endcapZPos_PV);
 
 
-  Transform3D envelope_zreflected_Tr(RotationZYX(0,0,0), Translation3D(0, 0, -zpos_endcap));
-  PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope.reflect(sens), envelope_zreflected_Tr);
+  Transform3D envelope_zreflected_Tr(RotationZYX( 180*deg ,0,0), Translation3D(0, 0, -zpos_endcap));
+  PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope, envelope_zreflected_Tr);
   endcapZNeg_PV.addPhysVolID("barrel", -1);
 
   DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 1 );
