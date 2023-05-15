@@ -251,6 +251,9 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // auto ncell = mycell_v[0];
 //   mycell_v = {mycell_v[15]};
   int cellCounter = 0;
+  int physicalVolumeCounter = 0;
+  auto createPhysVolID = [&](){return physicalVolumeCounter++;};
+
 #ifdef DUMP_SENSOR_POSITIONS
   std::ofstream ofile_sensor_pos("ofile_sensor_pos_endcap.txt");
 #endif
@@ -392,7 +395,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor ),
                            Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
       PlacedVolume sensorPV = cellV.placeVolume(sensorVol, sensorTr);
-      sensorPV.addPhysVolID("cellnumber", 6 * cellCounter+2);
+//       sensorPV.addPhysVolID("cellnumber", 6 * cellCounter+2);
 #ifdef DUMP_SENSOR_POSITIONS
       ofile_sensor_pos  << 6 * cellCounter+2 << '\t'
                          << ncell.RID << '\t'
@@ -406,7 +409,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       sensorDE.setPlacement(sensorPV);
 
       PlacedVolume cellPV = endcap_cells_gas_envelope.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
-//       cellPV.addPhysVolID("cellnumber", 6*cellCounter + 0);
+      cellPV.addPhysVolID("cellnumber", createPhysVolID() );//6*cellCounter + 0);
       cellDE.setPlacement( cellPV );
 
       if (ncell.isReflected)
@@ -431,7 +434,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         Transform3D sensorTr_reflected(RotationZYX(-alpha + 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor),
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         PlacedVolume sensor_ref_PV = cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
-        sensor_ref_PV.addPhysVolID("cellnumber", 6 * cellCounter+5);
+//         sensor_ref_PV.addPhysVolID("cellnumber", 6 * cellCounter+5);
         DetElement sensor_ref_DE(cell_reflected_DE, create_part_name_ff("sensor") + "_ref_DE", 6 * cellCounter+5 );
         sensor_ref_DE.setPlacement(sensor_ref_PV);
 
@@ -453,7 +456,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 
         PlacedVolume cell_ref_PV = endcap_cells_gas_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
-//         cell_ref_PV.addPhysVolID("cellnumber", 6*cellCounter + 3);
+        cell_ref_PV.addPhysVolID("cellnumber", createPhysVolID() );//6*cellCounter + 3);
         cell_reflected_DE.setPlacement( cell_ref_PV );
       }
     } //-- end loop for sector
@@ -473,11 +476,11 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   endcapZPos_DE.setPlacement(endcapZPos_PV);
 
 
-  Transform3D envelope_zreflected_Tr(RotationZYX( 180*deg ,0,0), Translation3D(0, 0, -zpos_endcap));
+  Transform3D envelope_zreflected_Tr(RotationZYX( 0 ,0,180*deg), Translation3D(0, 0, -zpos_endcap));
   PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope, envelope_zreflected_Tr);
-  endcapZNeg_PV.addPhysVolID("barrel", -1);
+  endcapZNeg_PV.addPhysVolID("barrel", 2);
 
-  DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 1 );
+  DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 2 );
   endcapZNeg_DE.setPlacement(endcapZNeg_PV);
 
 
