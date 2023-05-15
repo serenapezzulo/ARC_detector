@@ -141,6 +141,29 @@ or draw the sensor hit pattern just the fifth event
 Note 1: this primitive way of chopping the bitfield can be done using the corresponding DD4hep object.
 Note 2: if EDM4hep data format is used, please replace the name of the tree `EVENT` by `events`. The `cellID` tricks will work, but other variable names may change a bit.
 
+# Tests
+
+A simple test can be running a simulation with 1k of pi+ at 50 GeV, as the following
+
+```
+python3 arcfullsim.py --runType batch
+```
+
+Endcaps or barrel can be tested separately as well,
+
+```
+python3 endcapsim.py --runType batch
+python3 barrelsim.py --runType batch
+```
+
+Visualization of the detector can be also a test by itself,
+
+```
+geoDisplay compact/arc_barrel_v0.xml
+geoDisplay compact/arc_endcap_v0.xml
+geoDisplay compact/arc_full_v0.xml
+```
+
 # Useful links
 
 Documentation of DD4hep,

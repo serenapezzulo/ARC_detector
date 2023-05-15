@@ -67,7 +67,7 @@ if __name__ == "__main__":
     SIM.part.userParticleHandler = ""
 
     # Particle gun settings: pions with fixed energy and theta, varying phi
-    SIM.numberOfEvents = 100
+    SIM.numberOfEvents = 1000
     SIM.enableGun = True
     SIM.gun.energy = "50*GeV"
     SIM.gun.particle = "pi+"
@@ -92,6 +92,8 @@ if __name__ == "__main__":
     # Run the simulation
     try:
         SIM.run()
+        if os.path.getsize( SIM.outputFile ) < 1000000 :
+            raise RuntimeError("Output file not found or size less than 1MB")
         logger.info("TEST: passed")
     except NameError as e:
         logger.fatal("TEST: failed")
