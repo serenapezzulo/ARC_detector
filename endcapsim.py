@@ -71,8 +71,8 @@ if __name__ == "__main__":
     SIM.enableGun = True
     SIM.gun.energy = "50*GeV"
     SIM.gun.particle = "pi+"
-    SIM.gun.thetaMin = "0*deg"
-    SIM.gun.thetaMax = "55*deg"
+    #SIM.gun.thetaMin = "55*deg"
+    #SIM.gun.thetaMax = "90*deg"
     #SIM.gun.phiMin = "0*deg"
     #SIM.gun.phiMax = "45.1*deg"
     SIM.gun.distribution = "uniform"
