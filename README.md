@@ -83,12 +83,25 @@ More events can be simulated, but in this case only 1 will be saved into the out
 EVENT->Draw("ARC_HITS.position.Y():ARC_HITS.position.X()");
 ```
 
+In case of EDM4hep output format, execute the following line instead
+
+```cpp
+events->Draw("ARC_HITS.position.y:ARC_HITS.position.x");
+```
+
 A new canvas will open showing something similar to the following graph:
 
 ![Hit pattern of photons (and pion) in the detector](https://mattermost.web.cern.ch/files/11f17b5nctfkjqjsw1cmoh1rko/public?h=OQCOs1RkwC560pOU0reOnG9pJabN4rDqTu2wgqHeHNg)
 
 Hit pattern of photons (and pion) in the detector
 
+## Running the simulation of the full ARC detector
+
+There is an equivalent python steering file for the whole detector, which includes the barrel and endcaps. The following command will simulate 10k protons with default energy (50 GeV), and the output format will be EDM4hep (because of the extension of the output file name).
+
+```
+python3 arcfullsim.py --runType batch -N 10000 --gun.particle "proton" --outputFile "arcsim_proton_50GeV_edm4hep.root"
+```
 
 ## Interpreting the cellID
 
@@ -126,6 +139,7 @@ or draw the sensor hit pattern just the fifth event
 ```
 
 Note 1: this primitive way of chopping the bitfield can be done using the corresponding DD4hep object.
+Note 2: if EDM4hep data format is used, please replace the name of the tree `EVENT` by `events`. The `cellID` tricks will work, but other variable names may change a bit.
 
 # Useful links
 
