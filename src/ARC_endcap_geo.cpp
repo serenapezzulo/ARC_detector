@@ -240,16 +240,16 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   sensorVol.setVisAttributes( sensorVis );
 
   // Build cooling plate
-  double cooling_z_offset =   sensor_thickness  + cooling_thickness;
+  double cooling_z_offset =   sensor_thickness  + cooling_thickness + 0.5*mm;
   Tube coolingSol_tube(0, 1.5*hexagon_side_length, cooling_thickness);
 
   // Build aerogel plate
-  double aerogel_z_offset =   sensor_thickness  + aerogel_thickness;
+  double aerogel_z_offset =   sensor_thickness  + aerogel_thickness + 0.5*mm;
   Tube aerogelSol_tube(0, 1.5*hexagon_side_length, aerogel_thickness);
 
   // Build cells of a sector
   // auto ncell = mycell_v[0];
-//   mycell_v = {mycell_v[0],mycell_v[1],mycell_v[2]};
+//   mycell_v = {mycell_v[19]};
   phinmax = 1;
   int cellCounter = 0;
   int physicalVolumeCounter = 0;
@@ -305,13 +305,13 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       double angle_of_sensor(-999.);
       double zoffset_of_sensor(0);
 
-      // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
-      int name_col = ncell.col;
-      int name_row = ncell.row;
-      // retrieve stored parameters
+
+      // retrieve ell parameters
+      // if parameter not present, exception is thrown and not catched
       {
-        std::string name_col_s = std::to_string(name_col);
-        std::string name_row_s = std::to_string(name_row);
+        // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
+        std::string name_col_s = std::to_string(ncell.col);
+        std::string name_row_s = std::to_string(ncell.row);
         std::string MartinCellName = "EndCapRadiator_c" + name_col_s + "_r" + name_row_s;
 
         radius_of_sphere = desc.constantAsDouble(MartinCellName + "_Curvature");
@@ -339,23 +339,11 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             dd4hep::printout(dd4hep::WARNING,"ARCENDCAP_T", "+++ Constant %s is missing in xml file, default is 0",ZOffsetSensorParName.c_str());
         }
 
-
-
-        // check if parameters are ok
-        if (-999. == center_of_sphere_x)
-          throw std::runtime_error("Ilegal parameters: center_of_sphere_x not provided");
-        if (-999. == center_of_sphere_z)
-          throw std::runtime_error("Ilegal parameters: center_of_sphere_z not provided");
-        if (-999. == radius_of_sphere)
-          throw std::runtime_error("Ilegal parameters: radius_of_sphere not provided");
         if (radius_of_sphere <= mirrorThickness)
           throw std::runtime_error(Form("Ilegal parameters cell %d: %g <= %g", ncell.RID, radius_of_sphere, mirrorThickness));
 
-        if (-999. == center_of_sensor_x)
-          throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
-        if (-999. == angle_of_sensor)
-          throw std::runtime_error("Ilegal parameters: angle_of_sensor not provided");
       }
+      double sensor_z_pos = zoffset_of_sensor + sensor_z_origin_Martin;
 
       // create the semi-sphere that will result in the mirror
       Sphere mirrorShapeFull(radius_of_sphere - mirrorThickness,
@@ -384,13 +372,16 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       SkinSurface mirrorSkin(desc, mirrorDE, Form("mirror_optical_surface%d", cellCounter), mirrorSurf, mirrorVol); // FIXME: 3rd arg needs `imod`?
       mirrorSkin.isValid();
 
-/*
+
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 
-      Transform3D coolingTrCell(RotationZYX(0, 0, angle_of_sensor ),
-                          Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin-cooling_z_offset));
+//       Transform3D coolingTrCell(RotationZYX(0, 0, angle_of_sensor ),
+//                           Translation3D(0, center_of_sensor_x, sensor_z_pos-cooling_z_offset));
+
+      auto coolingTrCell = RotationZYX(0, 0, angle_of_sensor ) *
+                           Translation3D(0, center_of_sensor_x, sensor_z_pos-cooling_z_offset);
 
       Solid coolingSol = IntersectionSolid(cellS, coolingSol_tube, coolingTrCell);
       std::string coolingName = create_part_name_ff("cooling");
@@ -403,20 +394,29 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 
-      Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
-                          Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin+aerogel_z_offset));
+//       Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
+//                           Translation3D(0, center_of_sensor_x, sensor_z_pos+aerogel_z_offset));
+
+
+      auto aerogelTrCell = RotationZYX(0, 0, angle_of_sensor ) *
+                           Translation3D(0, center_of_sensor_x, sensor_z_pos+aerogel_z_offset);
 
       Solid aerogelSol = IntersectionSolid(cellS, aerogelSol_tube, aerogelTrCell);
       std::string aerogelName = create_part_name_ff("aerogel");
       /// TODO: change material
       Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
       aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
-      cellV.placeVolume(aerogelVol);*/
+      cellV.placeVolume(aerogelVol);
 
 
       // // Place detector in cell
-      Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor ),
-                           Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin + zoffset_of_sensor));
+//       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor ),
+//                            Translation3D(0, center_of_sensor_x, sensor_z_pos ));
+
+      auto sensorTr = RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor )*
+                           Translation3D(0, center_of_sensor_x, sensor_z_pos );
+
+
       PlacedVolume sensorPV = cellV.placeVolume(sensorVol, sensorTr);
 //       sensorPV.addPhysVolID("cellnumber", 6 * cellCounter+2);
 #ifdef DUMP_SENSOR_POSITIONS
