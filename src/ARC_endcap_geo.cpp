@@ -20,10 +20,10 @@
 
 using namespace dd4hep;
 
-#define DUMP_SENSOR_POSITIONS
+// #define DUMP_SENSOR_POSITIONS
 
 
-#include "ARC_par_reader.hpp"
+// #include "ARC_par_reader.hpp"
 
 /// Function to build one ARC endcap
 static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
@@ -48,7 +48,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 
   // read Martin file and store parameters by name in the map
-  fill_cell_parameters_m();
+//   fill_cell_parameters_m();
 
   // mother volume corresponds to the world
   Volume motherVol = desc.pickMotherVolume(det);
@@ -529,7 +529,7 @@ static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, Se
   sens.setType("tracker");
 
   // read Martin file and store parameters by name in the map
-  fill_cell_parameters_m();
+//   fill_cell_parameters_m();
 
   // mother volume corresponds to the world
   Volume motherVol = desc.pickMotherVolume(det);
