@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     # Output file (assuming CWD)
     #SIM.outputFile = "arcsim_edm4hep.root"
-    SIM.outputFile = "arcsim.root"
+    SIM.outputFile = "arcsim_edm4hep.root"
 
     # Override with user options
     SIM.parseOptions()
