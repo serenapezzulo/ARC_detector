@@ -21,7 +21,7 @@
 using namespace dd4hep;
 
 
-#include "ARC_par_reader.hpp"
+// #include "ARC_par_reader.hpp"
 
 /**
  * create barrel as sum of single cells.
@@ -46,7 +46,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     auto vesselVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(vis)));
 
     // read Martin file and store parameters by name in the map
-    fill_cell_parameters_m();
+//     fill_cell_parameters_m();
 
     // mother volume corresponds to the world
     Volume motherVol = desc.pickMotherVolume(det);
@@ -187,7 +187,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
     // WARNING for developping purposes
     // ncell_vector = {1};
-    // phinmax = 1;
+//     phinmax = 1;
 
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // loop to build each cell, repeated 27 times around phi    // // //
@@ -258,32 +258,28 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
             int name_col = ncell / 2;
             int name_row = ncell % 2 ? 1 : 2;
-            // retrieve stored parameters
+            // retrieve cell parameters
+            // if parameter not present, exception is thrown and not catched
             {
                 std::string name_col_s = std::to_string(name_col);
                 std::string name_row_s = std::to_string(name_row);
-                radius_of_sphere = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_Curvature"];
-                center_of_sphere_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_XPosition"];
-                double zposition = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_ZPosition"];
+                std::string MartinCellName = "Radiator_c" + name_col_s + "_r" + name_row_s;
 
-                center_of_sensor_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetPosition"];
-                angle_of_sensor = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetTilt"];
+                radius_of_sphere = desc.constantAsDouble(MartinCellName + "_Curvature");
+
+                center_of_sphere_x = desc.constantAsDouble(MartinCellName + "_XPosition");
+
+                double zposition = desc.constantAsDouble(MartinCellName + "_ZPosition");
+
+                center_of_sensor_x = desc.constantAsDouble(MartinCellName + "_DetPosition");
+
+                angle_of_sensor = desc.constantAsDouble(MartinCellName + "_DetTilt");
+
                 center_of_sphere_z = mirror_z_origin_Martin + zposition;
 
                 // check if parameters are ok
-                if (-999. == center_of_sphere_x)
-                    throw std::runtime_error("Ilegal parameters: center_of_sphere_x not provided");
-                if (-999. == center_of_sphere_z)
-                    throw std::runtime_error("Ilegal parameters: center_of_sphere_z not provided");
-                if (-999. == radius_of_sphere)
-                    throw std::runtime_error("Ilegal parameters: radius_of_sphere not provided");
                 if (radius_of_sphere <= mirrorThickness)
                     throw std::runtime_error("Ilegal parameters: radius_of_sphere <= mirrorThickness");
-
-                if (-999. == center_of_sensor_x)
-                    throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
-                if (-999. == angle_of_sensor)
-                    throw std::runtime_error("Ilegal parameters: angle_of_sensor not provided");
             }
 
             // reflect parameters for cells with z<0,
@@ -447,7 +443,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
     double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness + sensor_z_safe_shrink;
 
     // read Martin file and store parameters by name in the map
-    fill_cell_parameters_m();
+//     fill_cell_parameters_m();
 
     ///----------->>> Define vessel and gas volumes
     /* - `vessel`: aluminum enclosure, mother volume of the barrel
@@ -547,28 +543,20 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
             {
                 std::string name_col_s = std::to_string(name_col);
                 std::string name_row_s = std::to_string(name_row);
-                radius_of_sphere = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_Curvature"];
-                center_of_sphere_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_XPosition"];
-                double zposition = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_ZPosition"];
+                std::string MartinCellName = "Radiator_c" + name_col_s + "_r" + name_row_s;
 
-                center_of_sensor_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetPosition"];
-                angle_of_sensor = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetTilt"];
+                radius_of_sphere = desc.constantAsDouble(MartinCellName + "_Curvature");
+
+                center_of_sphere_x = desc.constantAsDouble(MartinCellName + "_XPosition");
+
+                double zposition = desc.constantAsDouble(MartinCellName + "_ZPosition");
+
+                center_of_sensor_x = desc.constantAsDouble(MartinCellName + "_DetPosition");
+
+                angle_of_sensor = desc.constantAsDouble(MartinCellName + "_DetTilt");
+
                 center_of_sphere_z = mirror_z_origin_Martin + zposition;
 
-                // check if parameters are ok
-                if (-999. == center_of_sphere_x)
-                    throw std::runtime_error("Ilegal parameters: center_of_sphere_x not provided");
-                if (-999. == center_of_sphere_z)
-                    throw std::runtime_error("Ilegal parameters: center_of_sphere_z not provided");
-                if (-999. == radius_of_sphere)
-                    throw std::runtime_error("Ilegal parameters: radius_of_sphere not provided");
-                if (radius_of_sphere <= thickness_sphere)
-                    throw std::runtime_error("Ilegal parameters: radius_of_sphere <= thickness_sphere");
-
-                if (-999. == center_of_sensor_x)
-                    throw std::runtime_error("Ilegal parameters: center_of_sensor_x not provided");
-                if (-999. == angle_of_sensor)
-                    throw std::runtime_error("Ilegal parameters: angle_of_sensor not provided");
             }
 
             if (reflect_parameters)

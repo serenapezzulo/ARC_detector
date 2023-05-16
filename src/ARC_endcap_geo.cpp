@@ -306,7 +306,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       double zoffset_of_sensor(0);
 
 
-      // retrieve ell parameters
+      // retrieve cell parameters
       // if parameter not present, exception is thrown and not catched
       {
         // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
