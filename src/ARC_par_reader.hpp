@@ -44,6 +44,8 @@ namespace
     int barrel_unique_cells(0);
     int endcap_unique_cells(0);
 
+    std::ofstream ofilexml("kk.xml");
+
     while (ifile.good())
     {
       // read one line and tokenize by delimiter
@@ -59,6 +61,13 @@ namespace
       if (2 != tokens.size())
         continue;
 
+
+      ofilexml << "<constant name=\""
+               << tokens.at(0)
+               << "\"             value=\""
+               << tokens.at(1);
+
+
       std::string &parname = tokens.at(0);
       double parvalue = atof(tokens[1].c_str());
       cell_parameters_m.emplace(parname, parvalue);
@@ -69,27 +78,35 @@ namespace
       {
         ++Curvature_counter;
         cell_parameters_m[parname] = cell_parameters_m[parname] * m;
+        ofilexml << " * m\"      />";
       }
       else if (std::string::npos != parname.find("XPosition"))
       {
         ++XPosition_counter;
         cell_parameters_m[parname] = cell_parameters_m[parname] * m;
+        ofilexml << " * m\"      />";
       }
       else if (std::string::npos != parname.find("ZPosition"))
       {
         ++ZPosition_counter;
         cell_parameters_m[parname] = cell_parameters_m[parname] * m;
+        ofilexml << " * m\"      />";
       }
       else if (std::string::npos != parname.find("DetPosition"))
       {
         ++DetPosition_counter;
         cell_parameters_m[parname] = cell_parameters_m[parname] * m;
+        ofilexml << " * m\"      />";
       }
       else if (std::string::npos != parname.find("DetTilt"))
       {
         ++DetTilt_counter;
         cell_parameters_m[parname] = cell_parameters_m[parname] * rad;
+        ofilexml << " * rad\"      />";
       }
+
+      ofilexml << std::endl;
+
       if (std::string::npos != parname.find("EndCapRadiator"))
         ++endcap_unique_cells;
       else if (std::string::npos != parname.find("Radiator"))

@@ -249,7 +249,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   // Build cells of a sector
   // auto ncell = mycell_v[0];
-//   mycell_v = {mycell_v[15]};
+//   mycell_v = {mycell_v[0],mycell_v[1],mycell_v[2]};
+  phinmax = 1;
   int cellCounter = 0;
   int physicalVolumeCounter = 0;
   auto createPhysVolID = [&](){return physicalVolumeCounter++;};
@@ -302,6 +303,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
       double center_of_sensor_x(-999.);
       double angle_of_sensor(-999.);
+      double zoffset_of_sensor(0);
 
       // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
       int name_col = ncell.col;
@@ -310,13 +312,34 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       {
         std::string name_col_s = std::to_string(name_col);
         std::string name_row_s = std::to_string(name_row);
-        radius_of_sphere = cell_parameters_m.at("EndCapRadiator_c" + name_col_s + "_r" + name_row_s + "_Curvature");
-        center_of_sphere_x = cell_parameters_m.at("EndCapRadiator_c" + name_col_s + "_r" + name_row_s + "_XPosition");
-        double zposition = cell_parameters_m.at("EndCapRadiator_c" + name_col_s + "_r" + name_row_s + "_ZPosition");
+        std::string MartinCellName = "EndCapRadiator_c" + name_col_s + "_r" + name_row_s;
+
+        radius_of_sphere = desc.constantAsDouble(MartinCellName + "_Curvature");
+
+        center_of_sphere_x = desc.constantAsDouble(MartinCellName + "_XPosition");
+
+        double zposition = desc.constantAsDouble(MartinCellName + "_ZPosition");
+
         center_of_sphere_z = mirror_z_origin_Martin + zposition;
 
-        center_of_sensor_x = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetPosition"];
-        angle_of_sensor = cell_parameters_m["Radiator_c" + name_col_s + "_r" + name_row_s + "_DetTilt"];
+        center_of_sensor_x = desc.constantAsDouble(MartinCellName + "_DetPosition");
+
+        angle_of_sensor = desc.constantAsDouble(MartinCellName + "_DetTilt");
+
+        std::string ZOffsetSensorParName = MartinCellName + "_DetZOffset";
+
+        // check if it is defined in the xml as constant,
+        // if it does not, printout a message
+        if( desc.constants().count(ZOffsetSensorParName) )
+        {
+          zoffset_of_sensor = desc.constantAsDouble(ZOffsetSensorParName);
+        }
+        else
+        {
+            dd4hep::printout(dd4hep::WARNING,"ARCENDCAP_T", "+++ Constant %s is missing in xml file, default is 0",ZOffsetSensorParName.c_str());
+        }
+
+
 
         // check if parameters are ok
         if (-999. == center_of_sphere_x)
@@ -361,7 +384,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       SkinSurface mirrorSkin(desc, mirrorDE, Form("mirror_optical_surface%d", cellCounter), mirrorSurf, mirrorVol); // FIXME: 3rd arg needs `imod`?
       mirrorSkin.isValid();
 
-
+/*
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -388,12 +411,12 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       /// TODO: change material
       Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
       aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
-      cellV.placeVolume(aerogelVol);
+      cellV.placeVolume(aerogelVol);*/
 
 
       // // Place detector in cell
       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor ),
-                           Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
+                           Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin + zoffset_of_sensor));
       PlacedVolume sensorPV = cellV.placeVolume(sensorVol, sensorTr);
 //       sensorPV.addPhysVolID("cellnumber", 6 * cellCounter+2);
 #ifdef DUMP_SENSOR_POSITIONS
@@ -412,7 +435,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       cellPV.addPhysVolID("cellnumber", createPhysVolID() );//6*cellCounter + 0);
       cellDE.setPlacement( cellPV );
 
-      if (ncell.isReflected)
+      if (false && ncell.isReflected)
       {
         std::string cellRefName = create_part_name_ff("cell_ref");
         Volume cellV_reflected(cellRefName, cellS, gasvolMat);
@@ -451,8 +474,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-          cellV_reflected.placeVolume(coolingVol);
-          cellV_reflected.placeVolume(aerogelVol);
+//           cellV_reflected.placeVolume(coolingVol);
+//           cellV_reflected.placeVolume(aerogelVol);
 
 
         PlacedVolume cell_ref_PV = endcap_cells_gas_envelope.placeVolume(cellV_reflected, RotationZ(phistep * phin) * Translation3D(-ncell.x, ncell.y, 0));
@@ -476,12 +499,12 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   endcapZPos_DE.setPlacement(endcapZPos_PV);
 
 
-  Transform3D envelope_zreflected_Tr(RotationZYX( 0 ,0,180*deg), Translation3D(0, 0, -zpos_endcap));
-  PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope, envelope_zreflected_Tr);
-  endcapZNeg_PV.addPhysVolID("barrel", 2);
-
-  DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 2 );
-  endcapZNeg_DE.setPlacement(endcapZNeg_PV);
+//   Transform3D envelope_zreflected_Tr(RotationZYX( 0 ,0,180*deg), Translation3D(0, 0, -zpos_endcap));
+//   PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope, envelope_zreflected_Tr);
+//   endcapZNeg_PV.addPhysVolID("barrel", 2);
+//
+//   DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 2 );
+//   endcapZNeg_DE.setPlacement(endcapZNeg_PV);
 
 
   PlacedVolume endcaps_PV = motherVol.placeVolume(endcaps_assemblyV);
