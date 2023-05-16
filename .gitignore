@@ -5,4 +5,4 @@ install
 .vscode
 kk*
 *.kdev4
-overlapDump.txt
+overlapDump*.txt
