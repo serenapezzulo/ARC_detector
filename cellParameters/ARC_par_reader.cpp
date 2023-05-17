@@ -9,6 +9,9 @@
 #include <fstream>
 #include <sstream>
 
+      const double rad = 1.0 ;
+      const double m = 1.0 ;
+
 namespace
 {
   // TODO: move parameters per cell to struct
@@ -44,7 +47,8 @@ namespace
     int barrel_unique_cells(0);
     int endcap_unique_cells(0);
 
-    std::ofstream ofilexml("kk.xml");
+    std::ofstream ofilexml("RadiatorCell_FinaOptimisation_converted2.xml");
+    ofilexml << "<lccdd >\n<define>\n";
 
     while (ifile.good())
     {
@@ -113,6 +117,8 @@ namespace
         ++barrel_unique_cells;
     }
     ifile.close();
+    ofilexml << "</lccdd >\n</define>\n";
+
 
     // normalize to the number of parameters per cell
     endcap_unique_cells /= 5;
@@ -138,4 +144,11 @@ namespace
   } // end void fill_cell_parameters_m()
 
 } // end anonymous namespace
+
+int main()
+{
+  fill_cell_parameters_m();
+  return 0;
+}
+
 #endif

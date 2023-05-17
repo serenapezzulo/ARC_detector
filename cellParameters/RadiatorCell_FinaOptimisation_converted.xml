@@ -1,3 +1,5 @@
+<lccdd >
+<define>
 <constant name="Radiator_c0_r1_Curvature"             value="0.369008 * m"      />
 <constant name="Radiator_c0_r1_XPosition"             value="0.00199739 * m"      />
 <constant name="Radiator_c0_r1_ZPosition"             value="0.000484417 * m"      />
@@ -203,3 +205,5 @@
 <constant name="EndCapRadiator_c8_r2_ZPosition"             value="0.101179 * m"      />
 <constant name="EndCapRadiator_c8_r2_DetPosition"             value="-0.117352 * m"      />
 <constant name="EndCapRadiator_c8_r2_DetTilt"             value="-1.3989 * rad"      />
+</lccdd >
+</define>
