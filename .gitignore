@@ -6,3 +6,4 @@ install
 kk*
 *.kdev4
 overlapDump*.txt
+*.png
