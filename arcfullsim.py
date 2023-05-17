@@ -87,8 +87,8 @@ if __name__ == "__main__":
     SIM.compactFile = "./compact/arc_full_v0.xml"
 
     # Output file (assuming CWD)
+    SIM.outputFile = "arcsim.root"
     #SIM.outputFile = "arcsim_edm4hep.root"
-    SIM.outputFile = "arcsim_edm4hep.root"
 
     # Override with user options
     SIM.parseOptions()
@@ -98,18 +98,32 @@ if __name__ == "__main__":
         SIM.run()
         if os.path.getsize( SIM.outputFile ) < 1000000 :
             raise RuntimeError("Output file not found or size less than 1MB")
+        # Create some images
+        outImagePrefix = "arcsim_"
+        ROOT.gROOT.SetBatch(1)
+        rootfile = ROOT.TFile(SIM.outputFile)
         if not "edm4hep" in SIM.outputFile :
-            # Create some images
-            outImagePrefix = "arcsim_"
-            rootfile = ROOT.TFile(SIM.outputFile)
             EVENT = rootfile.Get("EVENT")
             EVENT.Draw("ARC_HITS.position.Z():ARC_HITS.position.phi()","((ARC_HITS.cellID>>5)&0x7)==0")
             ROOT.gPad.SaveAs( outImagePrefix + "barrel_" + SIM.gun.particle + ".png")
-            EVENT.Draw("ARC_HITS.position.X():ARC_HITS.position.Y()","((ARC_HITS.cellID>>5)&0x7)==1")
+            EVENT.Draw("ARC_HITS.position.Y():ARC_HITS.position.X()","((ARC_HITS.cellID>>5)&0x7)==1")
             ROOT.gPad.SaveAs( outImagePrefix + "endcapZpos_" + SIM.gun.particle + ".png")
-            EVENT.Draw("ARC_HITS.position.X():ARC_HITS.position.Y()","((ARC_HITS.cellID>>5)&0x7)==2")
+            EVENT.Draw("ARC_HITS.position.Y():ARC_HITS.position.X()","((ARC_HITS.cellID>>5)&0x7)==2")
             ROOT.gPad.SaveAs( outImagePrefix + "endcapZneg_" + SIM.gun.particle + ".png")
-            rootfile.Close()
+            EVENT.Draw("ARC_HITS.position.Y():ARC_HITS.position.X()","((ARC_HITS.cellID>>5)&0x7)==2&&ARC_HITS.position.Y()>0&&ARC_HITS.position.X()>0")
+            ROOT.gPad.SaveAs( outImagePrefix + "endcapZneg_" + SIM.gun.particle + "zoom.png")
+        else :
+            EVENT = rootfile.Get("events")
+            EVENT.Draw("ARC_HITS.position.z:atan(ARC_HITS.position.y/ARC_HITS.position.x)","((ARC_HITS.cellID>>5)&0x7)==0&& ARC_HITS.position.x>0")
+            ROOT.gPad.SaveAs( outImagePrefix + "barrel_" + SIM.gun.particle + ".png")
+            EVENT.Draw("ARC_HITS.position.y:ARC_HITS.position.x","((ARC_HITS.cellID>>5)&0x7)==1")
+            ROOT.gPad.SaveAs( outImagePrefix + "endcapZpos_" + SIM.gun.particle + ".png")
+            EVENT.Draw("ARC_HITS.position.y:ARC_HITS.position.x","((ARC_HITS.cellID>>5)&0x7)==2")
+            ROOT.gPad.SaveAs( outImagePrefix + "endcapZneg_" + SIM.gun.particle + ".png")
+            EVENT.Draw("ARC_HITS.position.y:ARC_HITS.position.x","((ARC_HITS.cellID>>5)&0x7)==2&& ARC_HITS.position.x>0&& ARC_HITS.position.y>0")
+            ROOT.gPad.SaveAs( outImagePrefix + "endcapZneg_" + SIM.gun.particle + "zoom.png")
+
+        rootfile.Close()
 
         logger.info("TEST: passed")
 
