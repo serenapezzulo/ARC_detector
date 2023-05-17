@@ -114,8 +114,8 @@
 /vis/verbose warnings
 
 #/vis/viewer/addCutawayPlane
-/vis/viewer/centreAndZoomInOn world_volume_1
-
+/vis/viewer/centreAndZoomInOn ARCBARREL_vesselEnvelope_0
+/vis/viewer/centreAndZoomInOn ARCENDCAP_gasEnvelope_0
 # /vis/viewer/addCutawayPlane 0 0 0 m 0 0 1
 
 # /vis/viewer/set/sectionPlane  on  3.0  0.0  0.0  mm  1.0  0.0  0.0
@@ -127,3 +127,12 @@
 # /vis/ASCIITree/set/outFile kk.txt
 # /vis/ASCIITree/verbose 2
 # /vis/drawTree
+
+# set print mode to vectored
+#/vis/ogl/set/printMode vectored
+
+# print
+# /vis/ogl/set/printFilename arctest
+# /vis/ogl/set/exportFormat png
+# /vis/ogl/set/transparency true
+# /vis/ogl/export
