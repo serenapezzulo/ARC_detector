@@ -207,4 +207,4 @@
 <constant name="EndCapRadiator_c8_r2_DetTilt"             value="-1.3989 * rad"      />
 <!-- <constant name="EndCapRadiator_c6_r5_DetZOffset"             value="4.2 * mm"      /> -->
 </define>
-</lccdd >
+</lccdd>
