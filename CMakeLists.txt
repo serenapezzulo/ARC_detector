@@ -17,8 +17,6 @@ IF(NOT TARGET DD4hep::DDCore)
   dd4hep_configure_output()
 ENDIF()
 
-dd4hep_set_compiler_flags()
-dd4hep_use_python_executable()
 
 dd4hep_configure_output()
 
