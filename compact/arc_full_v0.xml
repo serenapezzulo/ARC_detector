@@ -85,7 +85,7 @@
   <vessel
       skinMaterial="CarbonFibStr"
       skin_vis="vessel_vis"
-      bulk_material="Aerogel_PFRICH"
+      bulk_material="Aerogel_vessel_foam"
       bulk_vis="vessel_bulk_vis"
       bulk_skin_ratio = "0.8"
     >
