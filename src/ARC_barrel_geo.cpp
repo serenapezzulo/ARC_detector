@@ -42,8 +42,17 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     auto gasvolVis  = desc.visAttributes(gasElem.attr<std::string>(_Unicode(vis)));
 
     auto vesselElem = detElem.child(_Unicode(vessel));
-    auto vesselMat  = desc.material(vesselElem.attr<std::string>(_Unicode(material)));
-    auto vesselVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(vis)));
+    auto vesselSkinMat  = desc.material(vesselElem.attr<std::string>(_Unicode(skinMaterial)));
+    auto vesselSkinVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(skin_vis)));
+
+    auto vesselBulkMat  = desc.material(vesselElem.attr<std::string>(_Unicode(bulk_material)));
+    auto vesselBulkVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(bulk_vis)));
+
+    double bulk_skin_ratio = vesselElem.attr<double>(_Unicode(bulk_skin_ratio));
+
+    if( 0 > bulk_skin_ratio || 1 < bulk_skin_ratio )
+        throw std::runtime_error("ARC: bulk_skin_ratio must be a number between 0 and 1");
+
 
     // read Martin file and store parameters by name in the map
 //     fill_cell_parameters_m();
@@ -147,11 +156,24 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                         vessel_length/2.);
     Volume barrel_cells_gas_envelope (detName+"_gasEnvelope", gasenvelopeS, gasvolMat );
     barrel_cells_gas_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
+
+
     Tube vesselEnvelopeSolid(  vessel_inner_r,
                                vessel_outer_r,
                                vessel_length/2. + vessel_wall_thickness);
-    Volume barrel_cells_vessel_envelope (detName+"_vesselEnvelope", vesselEnvelopeSolid, vesselMat );
-    barrel_cells_vessel_envelope.setVisAttributes( vesselVis );
+    Volume barrel_cells_vessel_envelope (detName+"_vesselSkin", vesselEnvelopeSolid, vesselSkinMat );
+    barrel_cells_vessel_envelope.setVisAttributes( vesselSkinVis );
+
+    double vessel_bulk_inner_r_ini = vessel_inner_r + (1 - bulk_skin_ratio)*0.5*vessel_wall_thickness;
+    double vessel_bulk_inner_r_fin = vessel_inner_r + (1 + bulk_skin_ratio)*0.5*vessel_wall_thickness;
+
+    Tube vesselSkinSolid( vessel_bulk_inner_r_ini,
+                          vessel_bulk_inner_r_fin,
+                          vessel_length/2. + vessel_wall_thickness);
+    Volume vessel_bulk_vol (detName+"_vesselBulkInner", vesselSkinSolid, vesselBulkMat );
+    vessel_bulk_vol.setVisAttributes( vesselBulkVis );
+    barrel_cells_vessel_envelope.placeVolume(vessel_bulk_vol);
+
     // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
     // Define the cell shape and volume
@@ -186,8 +208,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     int cellCounter(0);
 
     // WARNING for developping purposes
-    // ncell_vector = {1};
-//     phinmax = 1;
+    ncell_vector = {-16};
+    phinmax = 1;
 
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // loop to build each cell, repeated 27 times around phi    // // //

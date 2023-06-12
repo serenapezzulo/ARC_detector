@@ -46,6 +46,7 @@
   <vis name="mirror_vis21" r="055/256" g="128/256" b="128/256" alpha="1.0"  showDaughters="true" visible="true" />
   <vis name="no_vis" showDaughters="true" visible="false" />
   <vis name="envelope_vis"  r="0/256"   g="96/256"  b="156/256" alpha="0.1"  showDaughters="true" visible="true" />
+  <vis name="vessel_bulk_vis"  r="236/256" g="237/256" b="232/256" alpha="0.4"  showDaughters="true" visible="true" />
 </display>
 
 <define>
@@ -82,8 +83,11 @@
     >
   <!-- /detectors/detector/vessel -->
   <vessel
-      material="Aluminum"
-      vis="vessel_vis"
+      skinMaterial="CarbonFibStr"
+      skin_vis="vessel_vis"
+      bulk_material="Aerogel_PFRICH"
+      bulk_vis="vessel_bulk_vis"
+      bulk_skin_ratio = "0.8"
     >
   </vessel>
   <!-- /detectors/detector/radiatorgas -->
