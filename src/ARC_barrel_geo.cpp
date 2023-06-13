@@ -170,7 +170,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
     Tube vesselInnerBulkSolid( vessel_bulk_inner_r_ini,
                           vessel_bulk_inner_r_fin,
-                          vessel_length/2. + vessel_wall_thickness);
+                          vessel_length/2. + vessel_wall_thickness - (1-bulk_skin_ratio)*0.5*vessel_wall_thickness);
     Volume vessel_innerbulk_vol (detName+"_vesselInnerBulk", vesselInnerBulkSolid, vesselBulkMat );
     vessel_innerbulk_vol.setVisAttributes( vesselBulkVis );
     barrel_cells_vessel_envelope.placeVolume(vessel_innerbulk_vol);
@@ -186,8 +186,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     vessel_outerbulk_vol.setVisAttributes( vesselBulkVis );
     barrel_cells_vessel_envelope.placeVolume(vessel_outerbulk_vol);
 
-    Tube vesselBaseBulkSolid(  vessel_bulk_inner_r_ini,
-                               vessel_bulk_outer_r_fin,
+    Tube vesselBaseBulkSolid(  vessel_bulk_inner_r_fin,
+                               vessel_bulk_outer_r_ini,
                                bulk_skin_ratio*0.5*vessel_wall_thickness);
     Volume vessel_base_bulk_vol (detName+"_vesselBaseBulk", vesselBaseBulkSolid, vesselBulkMat );
     vessel_base_bulk_vol.setVisAttributes( vesselBulkVis );
