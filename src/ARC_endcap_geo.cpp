@@ -293,8 +293,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   // Build cells of a sector
   // auto ncell = mycell_v[0];
-  mycell_v = {mycell_v[19]};
-  phinmax = 1;
+//   mycell_v = {mycell_v[19]};
+//   phinmax = 1;
   int cellCounter = 0;
   int physicalVolumeCounter = 0;
   auto createPhysVolID = [&](){return physicalVolumeCounter++;};

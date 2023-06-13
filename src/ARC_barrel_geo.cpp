@@ -231,8 +231,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     int cellCounter(0);
 
     // WARNING for developping purposes
-    ncell_vector = {-16};
-    phinmax = 1;
+//     ncell_vector = {-16};
+//     phinmax = 1;
 
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // // // loop to build each cell, repeated 27 times around phi    // // //
