@@ -84,7 +84,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // // // // // // // // // // // // // // // // // // // // // // // //
     // // // // // // // //         COOLING PARAMETERS          // // // // // //
     // // // // // // // // // // // // // // // // // // // // // // // // // //
-    double cooling_radial_thickness = 1.0 * cm;
+    double cooling_radial_thickness = 2 * mm;
     // // //-------------------------------------------------------------// // //
 
 

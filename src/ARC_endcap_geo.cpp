@@ -83,7 +83,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //         COOLING PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double cooling_thickness = 1 * cm;
+  double cooling_thickness = 2 * mm;
   // // //-------------------------------------------------------------// // //
 
 
