@@ -185,6 +185,19 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     Volume vessel_outerbulk_vol (detName+"_vesselOuterBulk", vesselOuterBulkSolid, vesselBulkMat );
     vessel_outerbulk_vol.setVisAttributes( vesselBulkVis );
     barrel_cells_vessel_envelope.placeVolume(vessel_outerbulk_vol);
+
+    Tube vesselBaseBulkSolid(  vessel_bulk_inner_r_ini,
+                               vessel_bulk_outer_r_fin,
+                               bulk_skin_ratio*0.5*vessel_wall_thickness);
+    Volume vessel_base_bulk_vol (detName+"_vesselBaseBulk", vesselBaseBulkSolid, vesselBulkMat );
+    vessel_base_bulk_vol.setVisAttributes( vesselBulkVis );
+//     RotationX(0) * Translation3D(0, 0, vessel_length/2. + (1 - bulk_skin_ratio)*0.5*vessel_wall_thickness);
+    auto posZPositive = Position(0, 0, vessel_length/2. + 0.5*vessel_wall_thickness);
+    barrel_cells_vessel_envelope.placeVolume(vessel_base_bulk_vol,posZPositive);
+
+    auto posZNegative = Position(0, 0, -vessel_length/2. - 0.5*vessel_wall_thickness);
+    barrel_cells_vessel_envelope.placeVolume(vessel_base_bulk_vol,posZNegative);
+
     // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
     // Define the cell shape and volume
