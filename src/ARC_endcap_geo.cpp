@@ -43,8 +43,16 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   auto gasvolVis  = desc.visAttributes(gasElem.attr<std::string>(_Unicode(vis)));
 
   auto vesselElem = detElem.child(_Unicode(vessel));
-  auto vesselMat  = desc.material(vesselElem.attr<std::string>(_Unicode(material)));
-  auto vesselVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(vis)));
+  auto vesselSkinMat  = desc.material(vesselElem.attr<std::string>(_Unicode(skinMaterial)));
+  auto vesselSkinVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(skin_vis)));
+
+  auto vesselBulkMat  = desc.material(vesselElem.attr<std::string>(_Unicode(bulk_material)));
+  auto vesselBulkVis  = desc.visAttributes(vesselElem.attr<std::string>(_Unicode(bulk_vis)));
+
+    double bulk_skin_ratio = vesselElem.attr<double>(_Unicode(bulk_skin_ratio));
+
+    if( 0 > bulk_skin_ratio || 1 < bulk_skin_ratio )
+        throw std::runtime_error("ARC: bulk_skin_ratio must be a number between 0 and 1");
 
 
   // read Martin file and store parameters by name in the map
@@ -223,11 +231,47 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                         vessel_length/2.);
     Volume endcap_cells_gas_envelope (detName+"_gasEnvelope", gasenvelopeS, gasvolMat );
     endcap_cells_gas_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
+
     Tube vesselEnvelopeSolid(  vessel_inner_r,
                                vessel_outer_r,
                                vessel_length/2. + vessel_wall_thickness);
-    Volume endcap_cells_vessel_envelope (detName+"_vesselEnvelope", vesselEnvelopeSolid, vesselMat );
-    endcap_cells_vessel_envelope.setVisAttributes( vesselVis );
+    Volume endcap_cells_vessel_envelope (detName+"_vesselEnvelope", vesselEnvelopeSolid, vesselSkinMat );
+    endcap_cells_vessel_envelope.setVisAttributes( vesselSkinVis );
+
+    // build bulk for inner wall
+    double vessel_bulk_inner_r_ini = vessel_inner_r + (1 - bulk_skin_ratio)*0.5*vessel_wall_thickness;
+    double vessel_bulk_inner_r_fin = vessel_inner_r + (1 + bulk_skin_ratio)*0.5*vessel_wall_thickness;
+
+    Tube vesselInnerBulkSolid( vessel_bulk_inner_r_ini,
+                          vessel_bulk_inner_r_fin,
+                          vessel_length/2. + vessel_wall_thickness - (1-bulk_skin_ratio)*0.5*vessel_wall_thickness);
+    Volume vessel_innerbulk_vol (detName+"_vesselInnerBulk", vesselInnerBulkSolid, vesselBulkMat );
+    vessel_innerbulk_vol.setVisAttributes( vesselBulkVis );
+    endcap_cells_vessel_envelope.placeVolume(vessel_innerbulk_vol);
+
+    // build bulk for outer wall
+    double vessel_bulk_outer_r_ini = vessel_outer_r - (1 + bulk_skin_ratio)*0.5*vessel_wall_thickness;
+    double vessel_bulk_outer_r_fin = vessel_outer_r - (1 - bulk_skin_ratio)*0.5*vessel_wall_thickness;
+
+    Tube vesselOuterBulkSolid( vessel_bulk_outer_r_ini,
+                               vessel_bulk_outer_r_fin,
+                               vessel_length/2. + vessel_wall_thickness -  (1-bulk_skin_ratio)*0.5*vessel_wall_thickness);
+    Volume vessel_outerbulk_vol (detName+"_vesselOuterBulk", vesselOuterBulkSolid, vesselBulkMat );
+    vessel_outerbulk_vol.setVisAttributes( vesselBulkVis );
+    endcap_cells_vessel_envelope.placeVolume(vessel_outerbulk_vol);
+
+    Tube vesselBaseBulkSolid(  vessel_bulk_inner_r_fin,
+                               vessel_bulk_outer_r_ini,
+                               bulk_skin_ratio*0.5*vessel_wall_thickness);
+    Volume vessel_base_bulk_vol (detName+"_vesselBaseBulk", vesselBaseBulkSolid, vesselBulkMat );
+    vessel_base_bulk_vol.setVisAttributes( vesselBulkVis );
+    auto posZPositive = Position(0, 0, vessel_length/2. + 0.5*vessel_wall_thickness);
+    endcap_cells_vessel_envelope.placeVolume(vessel_base_bulk_vol,posZPositive);
+
+    auto posZNegative = Position(0, 0, -vessel_length/2. - 0.5*vessel_wall_thickness);
+    endcap_cells_vessel_envelope.placeVolume(vessel_base_bulk_vol,posZNegative);
+
+
     // // //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++// // //
 
   // Use regular polyhedra for endcaps cells
@@ -249,8 +293,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   // Build cells of a sector
   // auto ncell = mycell_v[0];
-//   mycell_v = {mycell_v[19]};
-//   phinmax = 1;
+  mycell_v = {mycell_v[19]};
+  phinmax = 1;
   int cellCounter = 0;
   int physicalVolumeCounter = 0;
   auto createPhysVolID = [&](){return physicalVolumeCounter++;};
