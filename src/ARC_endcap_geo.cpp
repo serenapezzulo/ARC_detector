@@ -79,7 +79,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //         COOLING PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double cooling_thickness = 10 * mm;
+  double cooling_thickness = 2 * mm;
   // // //-------------------------------------------------------------// // //
 
 
@@ -226,7 +226,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                         vessel_outer_r - vessel_wall_thickness,
                         vessel_length/2.);
     Volume endcap_cells_gas_envelope (detName+"_gasEnvelope", gasenvelopeS, gasvolMat );
-    endcap_cells_gas_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
+    endcap_cells_gas_envelope.setVisAttributes( desc.visAttributes("arc_envelope_vis") );
 
     Tube vesselEnvelopeSolid(  vessel_inner_r,
                                vessel_outer_r,
@@ -292,9 +292,8 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   Tube aerogelSol_tube(0, 1.5*hexagon_side_length, aerogel_thickness);
 
   // Build cells of a sector
-  // auto ncell = mycell_v[0];
-  // mycell_v = {mycell_v[19]};
-  // phinmax = 1;
+//   mycell_v = {mycell_v[16], mycell_v[19]};
+  phinmax = 1;
   int cellCounter = 0;
   int physicalVolumeCounter = 0;
   auto createPhysVolID = [&](){return physicalVolumeCounter++;};
@@ -372,16 +371,11 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
         std::string ZOffsetSensorParName = MartinCellName + "_DetZOffset";
 
-        // check if it is defined in the xml as constant,
-        // if it does not, printout a message
-        if( desc.constants().count(ZOffsetSensorParName) )
-        {
-          zoffset_of_sensor = desc.constantAsDouble(ZOffsetSensorParName);
-        }
+
+        if( desc.constants().count(MartinCellName + "_DetPositionZ") )
+            zoffset_of_sensor = desc.constantAsDouble(MartinCellName + "_DetPositionZ");
         else
-        {
-            dd4hep::printout(dd4hep::WARNING,"ARCENDCAP_T", "+++ Constant %s is missing in xml file, default is 0",ZOffsetSensorParName.c_str());
-        }
+          dd4hep::printout(dd4hep::WARNING,"ARCENDCAP_T", "+++ Constant %s is missing in xml file, default is 0",ZOffsetSensorParName.c_str());
 
         if (radius_of_sphere <= mirrorThickness)
           throw std::runtime_error(Form("Ilegal parameters cell %d: %g <= %g", ncell.RID, radius_of_sphere, mirrorThickness));
@@ -408,7 +402,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       Solid mirrorSol = IntersectionSolid(cellS, mirrorShapeFull, mirrorTr);
       std::string mirrorVolName = create_part_name_ff("mirror");
       Volume mirrorVol(mirrorVolName, mirrorSol, mirrorMat);
-      mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
+      mirrorVol.setVisAttributes(desc.visAttributes(Form("arc_mirror_vis%d", ncell.RID)));
       PlacedVolume mirrorPV = cellV.placeVolume(mirrorVol);
 
       DetElement mirrorDE(cellDE, mirrorVolName + "DE", 6 * cellCounter+1 );
@@ -420,10 +414,6 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-
-//       Transform3D coolingTrCell(RotationZYX(0, 0, angle_of_sensor ),
-//                           Translation3D(0, center_of_sensor_x, sensor_z_pos-cooling_z_offset));
-
       auto coolingTrCell = RotationZYX(0, 0, angle_of_sensor ) *
                            Translation3D(0, center_of_sensor_x, sensor_z_pos-cooling_z_offset);
 
@@ -431,31 +421,20 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
       std::string coolingName = create_part_name_ff("cooling");
       /// TODO: change material
       Volume coolingVol( coolingName , coolingSol, mirrorMat );
-      coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
+      coolingVol.setVisAttributes( desc.visAttributes("arc_cooling_vis") );
       cellV.placeVolume(coolingVol);
 
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
       // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-
-//       Transform3D aerogelTrCell(RotationZYX(0, 0, angle_of_sensor ),
-//                           Translation3D(0, center_of_sensor_x, sensor_z_pos+aerogel_z_offset));
-
-
       auto aerogelTrCell = RotationZYX(0, 0, angle_of_sensor ) *
                            Translation3D(0, center_of_sensor_x, sensor_z_pos+aerogel_z_offset);
 
       Solid aerogelSol = IntersectionSolid(cellS, aerogelSol_tube, aerogelTrCell);
       std::string aerogelName = create_part_name_ff("aerogel");
-      /// TODO: change material
       Volume aerogelVol( aerogelName , aerogelSol, aerogelMat );
-      aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
+      aerogelVol.setVisAttributes( desc.visAttributes("arc_aerogel_vis") );
       cellV.placeVolume(aerogelVol);
-
-
-      // // Place detector in cell
-//       Transform3D sensorTr(RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor ),
-//                            Translation3D(0, center_of_sensor_x, sensor_z_pos ));
 
       auto sensorTr = RotationZYX(alpha - 90 * deg, 0 , angle_of_sensor )*
                            Translation3D(0, center_of_sensor_x, sensor_z_pos );
@@ -490,7 +469,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
         Solid mirrorSol_reflected = IntersectionSolid(cellS, mirrorShapeFull, mirrorTr_reflected);
         Volume mirrorVol_reflected(mirrorVolName + "_ref1", mirrorSol_reflected, mirrorMat);
-        mirrorVol_reflected.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
+        mirrorVol_reflected.setVisAttributes(desc.visAttributes(Form("arc_mirror_vis%d", ncell.RID)));
         PlacedVolume mirror_ref_PV = cellV_reflected.placeVolume(mirrorVol_reflected);
 
         DetElement mirror_ref_DE(cell_reflected_DE, mirrorVolName + "_ref1" + "DE", 6 * cellCounter+4 );
@@ -544,13 +523,13 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   DetElement endcapZPos_DE(det, "endcapZPos_DE", 0 );
   endcapZPos_DE.setPlacement(endcapZPos_PV);
 
-
+/*
   Transform3D envelope_zreflected_Tr(RotationZYX( 0 ,0,180*deg), Translation3D(0, 0, -zpos_endcap));
   PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope, envelope_zreflected_Tr);
   endcapZNeg_PV.addPhysVolID("barrel", 2);
 
   DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 2 );
-  endcapZNeg_DE.setPlacement(endcapZNeg_PV);
+  endcapZNeg_DE.setPlacement(endcapZNeg_PV);*/
 
 
   PlacedVolume endcaps_PV = motherVol.placeVolume(endcaps_assemblyV);
@@ -675,7 +654,7 @@ static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, Se
       std::string volname = detName + "_cell" + std::to_string(ncell.RID);
       volname += "_phin" + std::to_string(phin);
       Volume cellV(volname, cellS, desc.material("Aluminum"));
-      cellV.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell.RID)));
+      cellV.setVisAttributes(desc.visAttributes(Form("arc_mirror_vis%d", ncell.RID)));
       Transform3D cellTr(RotationZ(60 * phin * deg), Translation3D(ncell.x, ncell.y, 0));
       PlacedVolume cellPV = motherVol.placeVolume(cellV, RotationZ(phistep * phin) * Translation3D(ncell.x, ncell.y, 0));
       cellPV.addPhysVolID("system", detID).addPhysVolID("module", ncell.RID);

@@ -188,17 +188,17 @@
 <constant name="EndCapRadiator_c7_r4_Curvature"             value="0.305523 * m"      />
 <constant name="EndCapRadiator_c7_r4_XPosition"             value="-0.171981 * m"      />
 <constant name="EndCapRadiator_c7_r4_ZPosition"             value="0.0783345 * m"      />
-<constant name="EndCapRadiator_c7_r4_DetPosition"             value="-0.060806 * m"      />
+<constant name="EndCapRadiator_c7_r4_DetPosition"             value="-0.0597 * m"      />
 <constant name="EndCapRadiator_c7_r4_DetTilt"             value="-0.286207 * rad"      />
 <constant name="EndCapRadiator_c7_r1_Curvature"             value="0.347918 * m"      />
 <constant name="EndCapRadiator_c7_r1_XPosition"             value="-0.210358 * m"      />
 <constant name="EndCapRadiator_c7_r1_ZPosition"             value="0.0679805 * m"      />
-<constant name="EndCapRadiator_c7_r1_DetPosition"             value="-0.0614699 * m"      />
+<constant name="EndCapRadiator_c7_r1_DetPosition"             value="-0.0604699 * m"      />
 <constant name="EndCapRadiator_c7_r1_DetTilt"             value="-0.413081 * rad"      />
 <constant name="EndCapRadiator_c7_r3_Curvature"             value="0.274816 * m"      />
 <constant name="EndCapRadiator_c7_r3_XPosition"             value="-0.186277 * m"      />
 <constant name="EndCapRadiator_c7_r3_ZPosition"             value="0.10374 * m"      />
-<constant name="EndCapRadiator_c7_r3_DetPosition"             value="-0.0485 * m"      />
+<constant name="EndCapRadiator_c7_r3_DetPosition"             value="-0.0455 * m"      />
 <constant name="EndCapRadiator_c7_r3_DetTilt"             value="-0.652112 * rad"      />
 <constant name="EndCapRadiator_c8_r2_Curvature"             value="0.220668 * m"      />
 <constant name="EndCapRadiator_c8_r2_XPosition"             value="-0.200031 * m"      />
@@ -220,5 +220,9 @@
 <constant name="Radiator_c7_r1_DetPositionZ"             value="6.23 * mm"      />
 <!-- <constant name="Radiator_c8_r2_DetPositionZ"             value="0 * mm"      /> -->
 <constant name="Radiator_c8_r1_DetPositionZ"             value="11.7 * mm"      />
+
+<constant name="EndCapRadiator_c7_r3_DetPositionZ"             value="0.8 * mm"      />
+
+
 </define>
 </lccdd>
