@@ -205,5 +205,6 @@
 <constant name="EndCapRadiator_c8_r2_ZPosition"             value="0.101179 * m"      />
 <constant name="EndCapRadiator_c8_r2_DetPosition"             value="-0.117352 * m"      />
 <constant name="EndCapRadiator_c8_r2_DetTilt"             value="-1.3989 * rad"      />
-</lccdd >
 </define>
+</lccdd >
+

@@ -79,7 +79,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // // // // // // // // // // // // // // // // // // // // // // // //
     // // // // // // // //         COOLING PARAMETERS          // // // // // //
     // // // // // // // // // // // // // // // // // // // // // // // // // //
-    double cooling_radial_thickness = 10 * mm;
+    double cooling_radial_thickness = 2 * mm;
     // // //-------------------------------------------------------------// // //
 
 
@@ -121,9 +121,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     double sensor_sidex     = 8 * cm;
     double sensor_sidey     = 8 * cm;
     double sensor_thickness = 0.2 * cm;
-    // empirical distance to keep the sensor inside the cell volume
-    double sensor_z_safe_distance = 1.25*mm;
-    double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness + sensor_z_safe_distance;
+    double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + 5*mm;
     auto sensorMat = desc.material("SiliconOptical");
     auto sensorVis = desc.visAttributes("no_vis");
     // auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
@@ -220,8 +218,8 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
     // Build the mirror for ncell=1..18
     // negative values correspond the cells that placed for z<0
-    std::vector<int> ncell_vector = {-2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, /*-17, -18,*/
-                                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 /*, 17, 18 */
+    std::vector<int> ncell_vector = {-2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, /*, -18,*/
+                                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 , 17 /*, 18 */
                                     };
 
     // dummy counter to identify the cell number
@@ -229,7 +227,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     int cellCounter(0);
 
     // WARNING for developping purposes
-//     ncell_vector = {-16};
+//     ncell_vector = {16,17};
 //     phinmax = 1;
 
     // // // ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> ~> // // //
@@ -296,6 +294,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             double radius_of_sphere(-999.);
 
             double center_of_sensor_x(-999.);
+            double center_of_sensor_z_offset(0);
             double angle_of_sensor(-999.);
 
             // convert Roger nomenclature (one cell number) to Martin nomenclature (row and col numbers)
@@ -315,6 +314,9 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                 double zposition = desc.constantAsDouble(MartinCellName + "_ZPosition");
 
                 center_of_sensor_x = desc.constantAsDouble(MartinCellName + "_DetPosition");
+
+                if( desc.constants().count(MartinCellName + "_DetPositionZ") )
+                    center_of_sensor_z_offset = desc.constantAsDouble(MartinCellName + "_DetPositionZ");
 
                 angle_of_sensor = desc.constantAsDouble(MartinCellName + "_DetTilt");
 
@@ -364,20 +366,25 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             sensorVol.setVisAttributes( sensorVis );
             sensorVol.setSensitiveDetector(sens);
 
-            Transform3D sensorTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin, 0, center_of_sensor_x));
+            double center_of_sensor_z = center_of_sensor_z_offset + sensor_z_origin_Martin;
+
+            Transform3D sensorTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-center_of_sensor_z, 0, center_of_sensor_x));
             PlacedVolume sensorPV = cellVol.placeVolume(sensorVol, RotationZYX(0, 90. * deg, 0. * deg)*sensorTr);
             sensorPV.addPhysVolID("cellnumber", 3 * cellCounter+2);
             DetElement sensorDE(cellDE, sensorName + "DE", 3 * cellCounter+2 );
             sensorDE.setType("tracker");
             sensorDE.setPlacement(sensorPV);
 
+            // this is an empirical parameter in order to pass the overlaps
+            double safe_distance_from_sensor = 262*um;
+
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  COOLING PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
             {
-                double cooling_z_offset =   sensor_thickness  + cooling_radial_thickness;
-                Tube coolingSol_tube(0, 1.5*hexagon_side_length, cooling_radial_thickness/2.);
-                Transform3D coolingTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin+cooling_z_offset, 0, center_of_sensor_x));
+                double cooling_z_offset =   sensor_thickness  + cooling_radial_thickness/2 + safe_distance_from_sensor;
+                Tube coolingSol_tube(0, 1.5*hexagon_side_length, cooling_radial_thickness);
+                Transform3D coolingTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-center_of_sensor_z+cooling_z_offset, 0, center_of_sensor_x));
                 auto coolingTrCell = RotationZYX(0, 90. * deg, 0. * deg)*coolingTr;
                 Solid coolingSol = IntersectionSolid(cell_shape, coolingSol_tube, coolingTrCell);
                 std::string coolingName = create_part_name_ff("cooling");
@@ -391,9 +398,9 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  AEROGEL PLATE  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-            double aerogel_z_offset =   sensor_thickness + aerogel_radial_thickness;
+            double aerogel_z_offset =   sensor_thickness - aerogel_radial_thickness/2 - safe_distance_from_sensor;
             Tube aerogelSol_tube(0, 1.5*hexagon_side_length, cooling_radial_thickness);
-            Transform3D aerogelTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-sensor_z_origin_Martin - aerogel_z_offset, 0, center_of_sensor_x));
+            Transform3D aerogelTr(RotationZYX(0, 90 * deg - angle_of_sensor, 0), Translation3D(-center_of_sensor_z + aerogel_z_offset, 0, center_of_sensor_x));
             auto aerogelTrCell = RotationZYX(0, 90. * deg, 0. * deg)*aerogelTr;
             Solid aerogelSol = IntersectionSolid(cell_shape, aerogelSol_tube, aerogelTrCell);
             std::string aerogelName = create_part_name_ff("aerogel");
