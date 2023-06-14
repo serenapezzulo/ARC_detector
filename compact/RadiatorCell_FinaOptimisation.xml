@@ -138,7 +138,7 @@
 <constant name="EndCapRadiator_c5_r2_Curvature"             value="0.324686 * m"      />
 <constant name="EndCapRadiator_c5_r2_XPosition"             value="-0.12464 * m"      />
 <constant name="EndCapRadiator_c5_r2_ZPosition"             value="0.0469601 * m"      />
-<constant name="EndCapRadiator_c5_r2_DetPosition"             value="-0.0383363 * m"      />
+<constant name="EndCapRadiator_c5_r2_DetPosition"             value="-0.0383 * m"      />
 <constant name="EndCapRadiator_c5_r2_DetTilt"             value="-0.186657 * rad"      />
 <constant name="EndCapRadiator_c5_r4_Curvature"             value="0.317135 * m"      />
 <constant name="EndCapRadiator_c5_r4_XPosition"             value="-0.121418 * m"      />
@@ -188,7 +188,7 @@
 <constant name="EndCapRadiator_c7_r4_Curvature"             value="0.305523 * m"      />
 <constant name="EndCapRadiator_c7_r4_XPosition"             value="-0.171981 * m"      />
 <constant name="EndCapRadiator_c7_r4_ZPosition"             value="0.0783345 * m"      />
-<constant name="EndCapRadiator_c7_r4_DetPosition"             value="-0.0597 * m"      />
+<constant name="EndCapRadiator_c7_r4_DetPosition"             value="-0.054 * m"      />
 <constant name="EndCapRadiator_c7_r4_DetTilt"             value="-0.286207 * rad"      />
 <constant name="EndCapRadiator_c7_r1_Curvature"             value="0.347918 * m"      />
 <constant name="EndCapRadiator_c7_r1_XPosition"             value="-0.210358 * m"      />
