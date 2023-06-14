@@ -125,7 +125,7 @@
   <mirror
       material="CarbonFibStr"
       thickness="ARC_MIRROR_THICKNESS"
-      surface="MirrorSurface"
+      surface="ARC_MirrorSurface"
       >
   </mirror>
   </detector>

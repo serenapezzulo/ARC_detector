@@ -60,10 +60,10 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //          VESSEL PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double vessel_outer_r = 210 * cm; // 190 * cm;
-  double vessel_inner_r = 25 * cm;  // 30.2 * cm;
-  double vessel_length = 20 * cm;
-  double vessel_wall_thickness = 1.0 * cm;
+  double vessel_outer_r = desc.constantAsDouble("ARC_ENDCAP_R_OUTER");
+  double vessel_inner_r = desc.constantAsDouble("ARC_ENDCAP_R_INNER");
+  double vessel_length = desc.constantAsDouble("ARC_ENDCAP_LENGTH");
+  double vessel_wall_thickness = desc.constantAsDouble("ARC_VESSEL_WALL_THICKNESS");
   if (vessel_outer_r <= vessel_inner_r)
     throw std::runtime_error("Ilegal parameters: vessel_outer_r <= vessel_inner_r");
   // // //-------------------------------------------------------------// // //
@@ -72,14 +72,14 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //         AEROGEL PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double aerogel_thickness = 1.0 * cm;
+  double aerogel_thickness = desc.constantAsDouble("ARC_AEROGEL_THICKNESS");
   auto aerogelMat = desc.material("Aerogel_PFRICH");
   // // //-------------------------------------------------------------// // //
 
   // // // // // // // // // // // // // // // // // // // // // // // // // //
   // // // // // // // //         COOLING PARAMETERS          // // // // // //
   // // // // // // // // // // // // // // // // // // // // // // // // // //
-  double cooling_thickness = 2 * mm;
+  double cooling_thickness = desc.constantAsDouble("ARC_COOLING_THICKNESS");
   // // //-------------------------------------------------------------// // //
 
 
@@ -293,7 +293,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   // Build cells of a sector
 //   mycell_v = {mycell_v[16], mycell_v[19]};
-  phinmax = 1;
+//   phinmax = 1;
   int cellCounter = 0;
   int physicalVolumeCounter = 0;
   auto createPhysVolID = [&](){return physicalVolumeCounter++;};
@@ -477,8 +477,6 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
         SkinSurface mirror_ref_Skin(desc, mirror_ref_DE, Form("mirror_ref_optical_surface%d", cellCounter), mirrorSurf, mirrorVol_reflected); // FIXME: 3rd arg needs `imod`?
         mirror_ref_Skin.isValid();
 
-//         Transform3D sensorTr_reflected(RotationZYX(-alpha + 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor),
-//                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin));
         auto sensorTr_reflected = RotationZYX(-alpha + 90 * deg, 0 /*90*deg-angle_of_sensor*/, angle_of_sensor)*
                                        Translation3D(0, center_of_sensor_x, sensor_z_origin_Martin);
         PlacedVolume sensor_ref_PV = cellV_reflected.placeVolume(sensorVol, sensorTr_reflected);
@@ -523,13 +521,13 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
   DetElement endcapZPos_DE(det, "endcapZPos_DE", 0 );
   endcapZPos_DE.setPlacement(endcapZPos_PV);
 
-/*
+
   Transform3D envelope_zreflected_Tr(RotationZYX( 0 ,0,180*deg), Translation3D(0, 0, -zpos_endcap));
   PlacedVolume endcapZNeg_PV = endcaps_assemblyV.placeVolume(endcap_cells_vessel_envelope, envelope_zreflected_Tr);
   endcapZNeg_PV.addPhysVolID("barrel", 2);
 
   DetElement endcapZNeg_DE(det, "endcapZNeg_DE", 2 );
-  endcapZNeg_DE.setPlacement(endcapZNeg_PV);*/
+  endcapZNeg_DE.setPlacement(endcapZNeg_PV);
 
 
   PlacedVolume endcaps_PV = motherVol.placeVolume(endcaps_assemblyV);
