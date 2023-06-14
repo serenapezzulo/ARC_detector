@@ -59,10 +59,10 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // // // // // // // // // // // // // // // // // // // // // // // //
     // // // // // // // //          VESSEL PARAMETERS          // // // // // //
     // // // // // // // // // // // // // // // // // // // // // // // // // //
-    double vessel_outer_r = 210 * cm;
-    double vessel_inner_r = 190 * cm;
-    double vessel_length = 440 * cm;
-    double vessel_wall_thickness = 1.0 * cm;
+    double vessel_outer_r = desc.constantAsDouble("ARC_BARREL_R_OUTER");
+    double vessel_inner_r = desc.constantAsDouble("ARC_BARREL_R_INNER");
+    double vessel_length = desc.constantAsDouble("ARC_BARREL_LENGTH");
+    double vessel_wall_thickness = desc.constantAsDouble("ARC_VESSEL_WALL_THICKNESS");
     if (vessel_outer_r <= vessel_inner_r)
         throw std::runtime_error("Ilegal parameters: vessel_outer_r <= vessel_inner_r");
     // // //-------------------------------------------------------------// // //
@@ -71,7 +71,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // // // // // // // // // // // // // // // // // // // // // // // //
     // // // // // // // //         AEROGEL PARAMETERS          // // // // // //
     // // // // // // // // // // // // // // // // // // // // // // // // // //
-    double aerogel_radial_thickness = 1.0 * cm;
+    double aerogel_radial_thickness = desc.constantAsDouble("ARC_AEROGEL_THICKNESS");
     auto aerogelMat = desc.material("Aerogel_PFRICH");
 
     // // //-------------------------------------------------------------// // //
@@ -79,7 +79,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     // // // // // // // // // // // // // // // // // // // // // // // // // //
     // // // // // // // //         COOLING PARAMETERS          // // // // // //
     // // // // // // // // // // // // // // // // // // // // // // // // // //
-    double cooling_radial_thickness = 2 * mm;
+    double cooling_radial_thickness = desc.constantAsDouble("ARC_COOLING_THICKNESS");
     // // //-------------------------------------------------------------// // //
 
 
@@ -123,7 +123,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
     double sensor_thickness = 0.2 * cm;
     double sensor_z_origin_Martin = vessel_inner_r + vessel_wall_thickness + 5*mm;
     auto sensorMat = desc.material("SiliconOptical");
-    auto sensorVis = desc.visAttributes("no_vis");
+    auto sensorVis = desc.visAttributes("arc_no_vis");
     // auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
 
     // Read from xml the parameters for the sensor module
@@ -148,7 +148,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                         vessel_outer_r - vessel_wall_thickness,
                         vessel_length/2.);
     Volume barrel_cells_gas_envelope (detName+"_gasEnvelope", gasenvelopeS, gasvolMat );
-    barrel_cells_gas_envelope.setVisAttributes( desc.visAttributes("envelope_vis") );
+    barrel_cells_gas_envelope.setVisAttributes( desc.visAttributes("arc_envelope_vis") );
 
 
     Tube vesselEnvelopeSolid(  vessel_inner_r,
@@ -350,7 +350,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             std::string mirrorName = create_part_name_ff("mirror"); // detName + "_mirror" + std::to_string(ncell) + "z" + std::to_string(reflect_parameters)
 
             Volume mirrorVol( mirrorName, mirrorSol, mirrorMat );
-            mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell)));
+            mirrorVol.setVisAttributes(desc.visAttributes(Form("arc_mirror_vis%d", ncell)));
             PlacedVolume mirrorPV = cellVol.placeVolume(mirrorVol);
 
             DetElement mirrorDE(cellDE, mirrorName + "DE", 3 * cellCounter+1 );
@@ -390,7 +390,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
                 std::string coolingName = create_part_name_ff("cooling");
                 /// TODO: change material
                 Volume coolingVol( coolingName, coolingSol, mirrorMat );
-                coolingVol.setVisAttributes( desc.visAttributes("cooling_vis") );
+                coolingVol.setVisAttributes( desc.visAttributes("arc_cooling_vis") );
                 cellVol.placeVolume(coolingVol );
             }
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -406,7 +406,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
             std::string aerogelName = create_part_name_ff("aerogel");
             /// TODO: change material
             Volume aerogelVol( aerogelName, aerogelSol, aerogelMat );
-            aerogelVol.setVisAttributes( desc.visAttributes("aerogel_vis") );
+            aerogelVol.setVisAttributes( desc.visAttributes("arc_aerogel_vis") );
             cellVol.placeVolume(aerogelVol );
             // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 
@@ -508,21 +508,21 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
                      vessel_outer_r,
                      vessel_length / 2.);
     Volume vesselVol(detName + "_vessel", vesselSolid, desc.material("CarbonFibStr"));
-    vesselVol.setVisAttributes(desc.visAttributes("vessel_vis"));
+    vesselVol.setVisAttributes(desc.visAttributes("arc_vessel_vis"));
 
     // Build cylinder vol for gas. It is placed inside vessel
     Tube gasvolSolid(vessel_inner_r + vessel_wall_thickness,
                      vessel_outer_r - vessel_wall_thickness,
                      vessel_length / 2.);
     Volume gasVol(detName + "_gas", gasvolSolid, desc.material("C4F10_PFRICH"));
-    gasVol.setVisAttributes(desc.visAttributes("gas_vis"));
+    gasVol.setVisAttributes(desc.visAttributes("arc_gas_vis"));
 #ifdef __CREATE_COOLING__
     // Build cylinder vol for cooling.It is placed inside gas
     Tube coolinSolid(vessel_inner_r + vessel_wall_thickness,
                      vessel_inner_r + vessel_wall_thickness + cooling_radial_thickness,
                      vessel_length / 2.);
     Volume coolingVol(detName + "_cooling", coolinSolid, desc.material("Copper"));
-    coolingVol.setVisAttributes(desc.visAttributes("cooling_vis"));
+    coolingVol.setVisAttributes(desc.visAttributes("arc_cooling_vis"));
 #endif
 
     //----->> Place mirrors and sensors
@@ -628,7 +628,7 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
             /// Define the actual mirror as intersection of the mother volume and the hollow sphere just defined
             Solid mirrorSol = IntersectionSolid(shape, mirrorShapeFull, mirrorTr);
             Volume mirrorVol(detName + "_mirror" + std::to_string(ncell) + "z" + std::to_string(reflect_parameters), mirrorSol, desc.material("Aluminum"));
-            mirrorVol.setVisAttributes(desc.visAttributes(Form("mirror_vis%d", ncell)));
+            mirrorVol.setVisAttributes(desc.visAttributes(Form("arc_mirror_vis%d", ncell)));
 
             // cellVol.placeVolume(mirrorVol, pyramidTr);
 
