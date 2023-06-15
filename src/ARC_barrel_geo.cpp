@@ -25,7 +25,13 @@ using namespace dd4hep;
 
 /**
  * create barrel as sum of single cells.
- * next step is to place mirrors+sensors in a cylindral shape gas volume
+ * The geometry tree is the following:
+ *
+ * vessel (CarbFib)-> vessel bulk (foam)
+ *                 -> gas envelope (gas)-> gas cell 1 (gas) -> elements (mirror, sensor, aeogel, cooling)
+ *                 -> gas envelope (gas)-> gas cell 2 (gas) -> elements (mirror, sensor, aeogel, cooling)
+ *                 -> gas envelope (gas)-> gas cell ...
+ *
  */
 static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
 {
