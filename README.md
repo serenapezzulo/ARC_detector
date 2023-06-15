@@ -178,5 +178,10 @@ Example of RICH detector implemented in DD4hep
 * Proximity Focusing RICH: https://github.com/AIDASoft/DD4hep/tree/master/examples/OpticalTracker
 
 Documentation of ARC,
-* Dec-22 ARC meeting indico: https://indico.cern.ch/event/1231098/
-* Mar-28 Discussion about ARC implementation in DD4hep: https://indico.cern.ch/event/1266428/
+* 1-July-2021 FCC week https://indico.cern.ch/event/995850/contributions/4406336/attachments/2274813/3864163/ARC-presentation.pdf
+* 23-June-2022 Workshop on detector for FCCee https://indico.cern.ch/event/1165167/contributions/4927647/attachments/2468337/4233740/ARC-update.pdf
+* 6-October-2022 ECFA Workshop https://indico.desy.de/event/33640/contributions/128392/attachments/77681/100501/ARC_Presentation_ECFA_Workshop_DESY_6th_October_2022.pdf
+* 15-Dec-2022 ARC meeting indico: https://indico.cern.ch/event/1231098/
+* 25-January-2023 FCC workshop https://indico.cern.ch/event/1176398/contributions/5208403/attachments/2581656/4452921/ARC_Presentation_FCC_Workshop_Krakow_25th_January_2023.pdf
+* 28-March-2023 Discussion about ARC implementation in DD4hep: https://indico.cern.ch/event/1266428/
+* 8-June-2023 FCC week https://indico.cern.ch/event/1202105/contributions/5396830/attachments/2662099/4612055/fccweek23_atd_v7.pdf
