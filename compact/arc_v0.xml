@@ -98,7 +98,7 @@
       vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
       radius="MIRROR_RADIUS"
-      surface="MirrorSurface"
+      surface="ARC_MirrorSurface"
       />
   </mirror>
 
