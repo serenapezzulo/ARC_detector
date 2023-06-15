@@ -212,7 +212,7 @@
 <constant name="Radiator_c3_r1_DetPositionZ"             value="1.35 * mm"      />
 <constant name="Radiator_c4_r2_DetPositionZ"             value="3.3 * mm"      />
 <constant name="Radiator_c4_r1_DetPositionZ"             value="4.00 * mm"      />
-<constant name="Radiator_c5_r2_DetPositionZ"             value="4.461 * mm"      />
+<constant name="Radiator_c5_r2_DetPositionZ"             value="4.465 * mm"      />
 <constant name="Radiator_c5_r1_DetPositionZ"             value="2.2 * mm"      />
 <constant name="Radiator_c6_r2_DetPositionZ"             value="5.06 * mm"      />
 <constant name="Radiator_c6_r1_DetPositionZ"             value="1.35 * mm"      />
