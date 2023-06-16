@@ -23,7 +23,7 @@ using namespace dd4hep;
 // #define DUMP_SENSOR_POSITIONS
 
 /// Function to build one ARC endcap
-static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
+static Ref_t create_arc_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
 {
   xml::DetElement detElem = handle;
   std::string detName = detElem.nameStr();
@@ -536,7 +536,7 @@ static Ref_t create_endcap_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
   return det;
 }
-DECLARE_DETELEMENT(ARCENDCAP_T, create_endcap_cell)
+DECLARE_DETELEMENT(ARCENDCAP_T, create_arc_endcap_cell)
 
 /// Deprecated
 static Ref_t create_endcap_cell_volumes(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)

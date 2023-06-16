@@ -448,7 +448,7 @@ static Ref_t create_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveD
 
 DECLARE_DETELEMENT(ARCBARREL_T, create_barrel_cell)
 
-static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
+static Ref_t create_arc_barrel_cell(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
 {
     xml::DetElement detElem = handle;
     std::string detName = detElem.nameStr();
@@ -703,4 +703,4 @@ static Ref_t create_barrel(Detector &desc, xml::Handle_t handle, SensitiveDetect
     return det;
 }
 
-DECLARE_DETELEMENT(ARCBARREL_LEGACY_T, create_barrel)
+DECLARE_DETELEMENT(ARCBARREL_LEGACY_T, create_arc_barrel_cell)
