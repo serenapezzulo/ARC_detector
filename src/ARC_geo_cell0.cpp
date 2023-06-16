@@ -127,6 +127,8 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
 
       sensorVol.setVisAttributes(sensorVis);
       sensorVol.setSensitiveDetector(sens);
+        sensorVol.setRegion(desc, "minitel_region");
+
       double sensorCentre = cooling_thickness / 2. - sensorThickness / 2.;
       PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, Position(0, 0, sensorCentre));
       sensorPV.addPhysVolID("module", 127);
