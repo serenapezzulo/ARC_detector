@@ -25,35 +25,6 @@
   <vis name="no_vis" showDaughters="false" visible="false" />
 </display>
 
-  <limits>
-    <limitset name="minitel_limits_1">
-      <limit name="step_length_max" particles="e[+-]" value="1.0" unit="mm" />
-      <limit name="step_length_max" particles="mu[+-]" value="3.0" unit="mm" />
-      <limit name="step_length_max" particles="*" value="5.0" unit="mm" />
-      <limit name="track_length_max" particles="*" value="5.0" unit="mm" />
-      <limit name="time_max"         particles="*" value="5.0" unit="ns" />
-      <limit name="ekin_min"         particles="*" value="0.01" unit="MeV" />
-      <limit name="range_min"        particles="*" value="5.0" unit="mm" />
-      <cut   particles="e+"          value="2.0"   unit="mm" />
-      <cut   particles="e-"          value="2.0"   unit="mm" />
-      <cut   particles="gamma"       value="5.0"   unit="mm" />
-    </limitset>
-    <limitset name="minitel_limits">
-      <limit name="step_length_max" particles="e[+-]" value="1.0" unit="mm" />
-      <limit name="step_length_max" particles="mu[+-]" value="3.0" unit="mm" />
-      <limit name="step_length_max" particles="*" value="5.0" unit="mm" />
-    </limitset>
-  </limits>
-
-  <regions>
-    <region name="minitel_region_1" eunit="MeV" lunit="mm" cut="0.001" threshold="0.001">
-      <limitsetref name="minitel_limits_1"/>
-    </region>
-    <region name="minitel_region" eunit="MeV" lunit="mm" cut="0.001" threshold="0.001">
-      <limitsetref name="minitel_limits"/>
-    </region>
-  </regions>
-
 <define>
   <constant name="world_side"             value="1*m"      />
   <constant name="world_x"                value="world_side"/>
@@ -70,7 +41,6 @@
   <constant name="SENSOR_NStripsY"        value="100"       />
   <constant name="SENSOR_pitchX"          value="0.08*cm" />
   <constant name="SENSOR_pitchY"          value="0.08*cm" />
-  <constant name="SENSOR_Y"               value="8.0*cm"    />
   <constant name="MIRROR_THICKNESS"       value="0.2*cm"    />
   <constant name="MIRROR_RADIUS"          value="36.9*cm"   />
   <constant name="COOLING_THICKNESS"      value="0.5*cm"    />
