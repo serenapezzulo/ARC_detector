@@ -164,6 +164,54 @@ geoDisplay compact/arc_endcap_v0.xml
 geoDisplay compact/arc_full_v0.xml
 ```
 
+# Migration to central detector repository k4geo
+
+This code was transferred to the FCCee central detector repository [k4geo](https://github.com/key4hep/k4geo/tree/master/detector/PID). In order to run a DD4hep stand-alone simulation of ARC detector with the code from k4geo, please follow the following steps:
+
+1. Download, compile and make the k4geo repository visible to the environment
+```
+source /cvmfs/sw-nightlies.hsf.org/key4hep/setup.sh
+git clone -b master  git@github.com:atolosadelgado/k4geo.git
+cd k4geo/
+cmake -B build -S . -D CMAKE_INSTALL_PREFIX=./install
+cmake --build build -j 20 -- install
+export LD_LIBRARY_PATH=$PWD/install/lib:$LD_LIBRARY_PATH
+```
+
+2. Move to k4geo/example directory, and you can launch a simulation of ARC with the following command
+
+```
+cd example
+python3 arcfullsim.py --runType batch --compactFile ../FCCee/CLD/compact/CLD_o3_v01/CLD_o3_v01.xml --gun.particle "proton" --gun.energy "10*GeV" -N 1234 --outputFile arcsim_edm4hep.root
+```
+
+Particle type must be provided as a string, the full list of possible particles can be found here: http://fismed.ciemat.es/GAMOS/GAMOS_doc/GAMOS.5.1.0/x11519.html
+
+3. You can further customize the particle gun with the following flags:
+```
+--gun.particle GUN.PARTICLE
+    --gun.multiplicity GUN.MULTIPLICITY
+    --gun.phiMin GUN.PHIMIN
+    --gun.phiMax GUN.PHIMAX
+    --gun.thetaMin GUN.THETAMIN
+    --gun.thetaMax GUN.THETAMAX
+    --gun.etaMin GUN.ETAMIN
+    --gun.etaMax GUN.ETAMAX
+    --gun.momentumMin GUN.MOMENTUMMIN
+    --gun.momentumMax GUN.MOMENTUMMAX
+    --gun.energy GUN.ENERGY
+                          The kinetic energy for the particle gun.
+    --gun.direction GUN.DIRECTION
+                           direction of the particle gun, 3 vector
+    --gun.distribution {uniform,cos(theta),eta,pseudorapidity,ffbar}
+    --gun.isotrop GUN.ISOTROP
+                           isotropic distribution for the particle gun
+    --gun.position GUN.POSITION
+                           position of the particle gun, 3 vector
+```
+
+If even these options are not enough, Geant4 provides the so-called GPS, which can produce primary particles in a more sophisticated way (for example, histogram sampling)
+
 # Useful links
 
 Documentation of DD4hep,
