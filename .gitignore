@@ -1,3 +1,9 @@
 build
 install
 *.root
+*.pdf
+.vscode
+kk*
+*.kdev4
+overlapDump*.txt
+*.png

@@ -310,6 +310,12 @@
       <property name="RINDEX" ref="RINDEX__Air"/>
       <property name="ABSLENGTH" coldim="2" values="1*eV  200*m  5*eV  200*m"/>
     </material>
+    <material name="SiliconOptical">
+      <D type="density" unit="g/cm3" value="2.3"/>
+      <fraction n="1.0" ref="Si"/>
+      <property name="RINDEX"    ref="RINDEX__C4F10_PFRICH"/>
+      <property name="ABSLENGTH" coldim="2" values="1*eV  0.1*mm  5*eV  0.1*mm"/>
+    </material>
     <material name="Vacuum">
       <D type="density" unit="g/cm3" value="0.0000000001"/>
       <fraction n="0.754" ref="N"/>
@@ -365,6 +371,21 @@
       <property name="RINDEX"    ref="RINDEX__Acrylic_PFRICH"/>
       <property name="ABSLENGTH" ref="ABSLENGTH__Acrylic_PFRICH"/>
     </material>
+    <material name="CarbonFibStr">
+      <D type="density" value="1.45" unit="g/cm3"/>
+      <comment> CMS ECAL https://gitlab.cern.ch/geant4/geant4/-/blob/master/examples/advanced/composite_calorimeter/dataglobal/material.cms#L183 </comment>
+      <composite n="2"   ref="C"/>
+      <composite n="13"  ref="H"/>
+    </material>
+
+    <material name="Aerogel_vessel_foam">
+      <D type="density" value="0.110" unit="g/cm3"/>
+      <comment> Filling of the ARC walls, made of aerogel as template material </comment>
+      <comment> n_air = [dens(Si02)-dens(aerogel)] / [dens(Si02)-dens(Air) ] </comment>
+      <fraction n="    (2.32-0.11) / (2.32-0.0012)" ref="Air"/>
+      <fraction n="1 - (2.32-0.11) / (2.32-0.0012)" ref="SiliconDioxide"/>
+    </material>
+
   </materials>
 
   <surfaces>
@@ -374,8 +395,13 @@
         4*eV  1
         7*eV  1
         "/>
+      <property name="REFLECTIVITY" coldim="2" values="
+        1*eV  0
+        4*eV  0
+        7*eV  0
+        "/>
     </opticalsurface>
-        <opticalsurface name="MirrorSurface" model="glisur" finish="polished" type="dielectric_metal">
+        <opticalsurface name="ARC_MirrorSurface" model="glisur" finish="polished" type="dielectric_metal">
       <property name="REFLECTIVITY" coldim="2" values="
         1*eV  1
         4*eV  1

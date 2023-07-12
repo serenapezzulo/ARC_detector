@@ -1,6 +1,5 @@
 //----------------------------------
-//  pfRICH: Proximity Focusing RICH
-//  Author: C. Dilks
+//         ARC detector v0
 //----------------------------------
 
 #include "DD4hep/DetFactoryHelper.h"
@@ -13,7 +12,22 @@ using namespace dd4hep;
 using namespace dd4hep::rec;
 using dd4hep::SubtractionSolid;
 
-// create the detector
+#include <map>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <sstream>
+
+/*! 
+ *  \brief     Detector constructor of single cubic RICH cell
+ *  \details   This code creates a minimal working example of a RICH cell. Evolved from the pfRICH example in DD4hep.
+ *  \author    Alvaro Tolosa-Delgado alvaro.tolosa.delgado@cern.ch
+ *  \author    Martin Tat            martin.tat@cern.ch
+ *  \version   0
+ *  \date      2023
+ *  \pre       DD4hep compiled with Geant4+Qt
+ *  \bug       Walls do not reflect optical photons
+ */
 static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetector sens)
 {
   xml::DetElement detElem = handle;
@@ -38,32 +52,32 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
 
   // - mirror
   auto mirrorElem = detElem.child(_Unicode(mirror)).child(_Unicode(module));
-  auto mirrorVis        = desc.visAttributes(mirrorElem.attr<std::string>(_Unicode(vis)));
-  auto mirrorMat        = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
-  auto mirrorR          = mirrorElem.attr<double>(_Unicode(radius));
-  auto mirrorThickness  = mirrorElem.attr<double>(_Unicode(thickness));
-  auto mirrorSurf       = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
+  auto mirrorVis = desc.visAttributes(mirrorElem.attr<std::string>(_Unicode(vis)));
+  auto mirrorMat = desc.material(mirrorElem.attr<std::string>(_Unicode(material)));
+  auto mirrorR = mirrorElem.attr<double>(_Unicode(radius));
+  auto mirrorThickness = mirrorElem.attr<double>(_Unicode(thickness));
+  auto mirrorSurf = surfMgr.opticalSurface(mirrorElem.attr<std::string>(_Unicode(surface)));
 
   // - sensor module
   auto sensorElem = detElem.child(_Unicode(sensors)).child(_Unicode(module));
-  auto sensorVis          = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
-  double sensorX          = sensorElem.attr<double>(_Unicode(sensorX));
-  double sensorY          = sensorElem.attr<double>(_Unicode(sensorY));
-  double sensorThickness  = sensorElem.attr<double>(_Unicode(thickness));
-  auto sensorSurf         = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
-  auto sensorMat          = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
+  auto sensorVis = desc.visAttributes(sensorElem.attr<std::string>(_Unicode(vis)));
+  double sensorX = sensorElem.attr<double>(_Unicode(sensorX));
+  double sensorY = sensorElem.attr<double>(_Unicode(sensorY));
+  double sensorThickness = sensorElem.attr<double>(_Unicode(thickness));
+  auto sensorSurf = surfMgr.opticalSurface(sensorElem.attr<std::string>(_Unicode(surface)));
+  auto sensorMat = desc.material(sensorElem.attr<std::string>(_Unicode(material)));
 
   // - aerogel
   auto aerogelElem = detElem.child(_Unicode(aerogel)).child(_Unicode(module));
-  auto aerogelVis           = desc.visAttributes(aerogelElem.attr<std::string>(_Unicode(vis)));
-  auto aerogelMat           = desc.material(aerogelElem.attr<std::string>(_Unicode(material)));
-  double aerogel_thickness  = aerogelElem.attr<double>(_Unicode(thickness));
+  auto aerogelVis = desc.visAttributes(aerogelElem.attr<std::string>(_Unicode(vis)));
+  auto aerogelMat = desc.material(aerogelElem.attr<std::string>(_Unicode(material)));
+  double aerogel_thickness = aerogelElem.attr<double>(_Unicode(thickness));
 
   // - cooling
   auto coolingElem = detElem.child(_Unicode(cooling)).child(_Unicode(module));
-  auto coolingVis           = desc.visAttributes(coolingElem.attr<std::string>(_Unicode(vis)));
-  auto coolingMat           = desc.material(coolingElem.attr<std::string>(_Unicode(material)));
-  double cooling_thickness  = coolingElem.attr<double>(_Unicode(thickness));
+  auto coolingVis = desc.visAttributes(coolingElem.attr<std::string>(_Unicode(vis)));
+  auto coolingMat = desc.material(coolingElem.attr<std::string>(_Unicode(material)));
+  double cooling_thickness = coolingElem.attr<double>(_Unicode(thickness));
 
   ///----------->>> Define vessel and gas volumes
   /* - `vessel`: aluminum enclosure, mother volume
@@ -71,7 +85,7 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
    *   as children of `gasvol`. Sensor is placed inside Cooling.
    * vessel (cubic) -> Gasvol (cubic) -> Cooling (cubic) -> Sensor CCD (cubic)
    *                                 \-> Mirror (sphere intersection with gasvol)
-   *                                 \-> Aerogel 
+   *                                 \-> Aerogel
    */
 
   // Vessel
@@ -113,15 +127,17 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
 
       sensorVol.setVisAttributes(sensorVis);
       sensorVol.setSensitiveDetector(sens);
+        sensorVol.setRegion(desc, "minitel_region");
+
       double sensorCentre = cooling_thickness / 2. - sensorThickness / 2.;
-      PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, Position(0, 0, sensorCentre ));
+      PlacedVolume sensorPV = coolingVol.placeVolume(sensorVol, Position(0, 0, sensorCentre));
       sensorPV.addPhysVolID("module", 127);
 
       // // Make sensor sensitive + define optical properties
-      // DetElement sensorDE(aerogelDE, "ARC_sensor", 127);
-      // sensorDE.setPlacement(sensorPV);
-      // SkinSurface sensorSkin(desc, sensorDE, "sensor_optical_surface", sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
-      // sensorSkin.isValid();
+      DetElement sensorDE(det, "ARC_sensor", 127);
+      sensorDE.setPlacement(sensorPV);
+      SkinSurface sensorSkin(desc, sensorDE, "sensor_optical_surface", sensorSurf, sensorVol); // FIXME: 3rd arg needs `imod`?
+      sensorSkin.isValid();
     }
   }
   ///----------->>> Aerogel (+sensor)
@@ -134,9 +150,8 @@ static Ref_t createDetector(Detector &desc, xml::Handle_t handle, SensitiveDetec
 
     // place aerogel volume
     // z-position of gas volume
-    double aerogelCentre = cooling_thickness -gasThickness / 2. + aerogel_thickness / 2.;
+    double aerogelCentre = cooling_thickness - gasThickness / 2. + aerogel_thickness / 2.;
     /*PlacedVolume aerogelPV = */ gasvolVol.placeVolume(aerogelVol, Position(0, 0, aerogelCentre));
-
   }
   ///----------->>> Mirror
   {

@@ -58,31 +58,33 @@ if __name__ == "__main__":
         name="ParticleSelectFilter/OpticalPhotonSelector",
         parameter={"particle": "opticalphoton"},
         )
-    SIM.filter.mapDetFilter["ARC_DETECTORNAME"] = "opticalphotons"
+    SIM.filter.mapDetFilter["ARCENDCAP"] = "opticalphotons"
 
     # Use the optical tracker for the PFRICH
-    SIM.action.mapActions["ARC_DETECTORNAME"] = "Geant4OpticalTrackerAction"
+    SIM.action.mapActions["ARCENDCAP"] = "Geant4OpticalTrackerAction"
 
     # Disable user tracker particle handler, so hits can be associated to photons
     SIM.part.userParticleHandler = ""
 
     # Particle gun settings: pions with fixed energy and theta, varying phi
-    SIM.numberOfEvents = 100
+    SIM.numberOfEvents = 1000
     SIM.enableGun = True
     SIM.gun.energy = "50*GeV"
     SIM.gun.particle = "pi+"
-    SIM.gun.thetaMin = ".0*deg"
-    SIM.gun.thetaMax = "0.1*deg"
-    SIM.gun.distribution = "cos(theta)"
+    #SIM.gun.thetaMin = "55*deg"
+    #SIM.gun.thetaMax = "90*deg"
+    #SIM.gun.phiMin = "0*deg"
+    #SIM.gun.phiMax = "45.1*deg"
+    SIM.gun.distribution = "uniform"
     SIM.gun.multiplicity = 1
-    SIM.gun.position = "0 0 -20*cm"
+    SIM.gun.position = "0 0 0*cm"
 
 
     # Default compact file
-    SIM.compactFile = "./compact/arc_v0.xml"
+    SIM.compactFile = "./compact/arc_endcap_v0.xml"
 
     # Output file (assuming CWD)
-    SIM.outputFile = "arcsim.root"
+    SIM.outputFile = "arcsime.root"
 
     # Override with user options
     SIM.parseOptions()
@@ -91,6 +93,8 @@ if __name__ == "__main__":
     try:
         SIM.run()
         logger.info("TEST: passed")
+        if os.path.getsize( SIM.outputFile ) < 1000000 :
+            raise RuntimeError("Output file not found or size less than 1MB")
     except NameError as e:
         logger.fatal("TEST: failed")
         if "global name" in str(e):

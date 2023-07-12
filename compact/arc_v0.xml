@@ -25,6 +25,35 @@
   <vis name="no_vis" showDaughters="false" visible="false" />
 </display>
 
+  <limits>
+    <limitset name="minitel_limits_1">
+      <limit name="step_length_max" particles="e[+-]" value="1.0" unit="mm" />
+      <limit name="step_length_max" particles="mu[+-]" value="3.0" unit="mm" />
+      <limit name="step_length_max" particles="*" value="5.0" unit="mm" />
+      <limit name="track_length_max" particles="*" value="5.0" unit="mm" />
+      <limit name="time_max"         particles="*" value="5.0" unit="ns" />
+      <limit name="ekin_min"         particles="*" value="0.01" unit="MeV" />
+      <limit name="range_min"        particles="*" value="5.0" unit="mm" />
+      <cut   particles="e+"          value="2.0"   unit="mm" />
+      <cut   particles="e-"          value="2.0"   unit="mm" />
+      <cut   particles="gamma"       value="5.0"   unit="mm" />
+    </limitset>
+    <limitset name="minitel_limits">
+      <limit name="step_length_max" particles="e[+-]" value="1.0" unit="mm" />
+      <limit name="step_length_max" particles="mu[+-]" value="3.0" unit="mm" />
+      <limit name="step_length_max" particles="*" value="5.0" unit="mm" />
+    </limitset>
+  </limits>
+
+  <regions>
+    <region name="minitel_region_1" eunit="MeV" lunit="mm" cut="0.001" threshold="0.001">
+      <limitsetref name="minitel_limits_1"/>
+    </region>
+    <region name="minitel_region" eunit="MeV" lunit="mm" cut="0.001" threshold="0.001">
+      <limitsetref name="minitel_limits"/>
+    </region>
+  </regions>
+
 <define>
   <constant name="world_side"             value="1*m"      />
   <constant name="world_x"                value="world_side"/>
@@ -51,10 +80,10 @@
 <detectors>
   <detector
     id="1"
-    name="ARC"
+    name="ARC_DETECTORNAME"
     type="ARCTYPE"
     gas="C4F10_PFRICH"
-    material="Aluminum"
+    material="CarbonFibStr"
     vis_vessel="vessel_vis"
     vis_gas="gas_vis"
     readout="ARC_HITS"
@@ -81,7 +110,7 @@
         - the material is `AirOptical`, to resolve a technical issue with the refractive boundary
     </comment>
     <module
-      material="AirOptical"
+      material="SiliconOptical"
       surface="SensorSurface_PFRICH"
       vis="sensor_vis"
       sensorX="SENSOR_X"
@@ -98,7 +127,7 @@
       vis="mirror_vis"
       thickness="MIRROR_THICKNESS"
       radius="MIRROR_RADIUS"
-      surface="MirrorSurface"
+      surface="ARC_MirrorSurface"
       />
   </mirror>
 
@@ -116,7 +145,7 @@
   <cooling>
     <!-- /detectors/detector/cooling/module -->
     <module
-      material="C4F10_PFRICH"
+      material="Aluminum"
       vis="cooling_vis"
       thickness="COOLING_THICKNESS"
       />
