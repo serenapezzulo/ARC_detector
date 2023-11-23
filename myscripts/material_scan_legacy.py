@@ -14,22 +14,20 @@ from Configurables import GeoSvc
 
 ## parse the given xml file
 geoservice = GeoSvc("GeoSvc")
-geoservice.detectors = [ 'lcgeoTests/compact/ARC_standalone_o1_v01.xml' ]
+geoservice.detectors = [ 'Detector/DetFCCeeIDEA-LAr/compact/FCCee_DectMaster_forX0.xml' ]
 geoservice.OutputLevel = INFO
 ApplicationMgr().ExtSvc += [geoservice]
 
-from Configurables import MaterialScan_2D_genericAngle
+from Configurables import MaterialScan
 # Material scan is done from the interaction point to the end of world volume.
 # In order to use other end boundary, please provide the name of a thin, e.g. cylindrical volume.
 # For instance adding envelopeName="BoundaryPostCalorimetry" will perform the scan only till the end of calorimetry.
 # BoundaryPostCalorimetry is defined in Detector/DetFCChhECalInclined/compact/envelopePreCalo.xml
-materialservice = MaterialScan_2D_genericAngle("GeoDump")
+materialservice = MaterialScan("GeoDump")
 materialservice.filename = "out_material_scan.root"
-materialservice.angleMax = 0.999
-materialservice.angleMin = 0
-materialservice.angleBinning = 0.001
-materialservice.angleDef = 'cosTheta'
-materialservice.nPhi = 1
+materialservice.etaBinning = 0.05
+materialservice.etaMax = 0.9
+materialservice.nPhiTrials = 10
 ApplicationMgr().ExtSvc += [materialservice]
 
 
