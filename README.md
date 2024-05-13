@@ -14,12 +14,36 @@ The directory structure is the following
 
 # Basic commands
 
-Build with `cmake`, 
+Build with `cmake`, for an Alma9 machine run
 ```bash
-source /cvmfs/sft.cern.ch/lcg/views/dev4/latest/x86_64-centos7-gcc11-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev4/latest/x86_64-el9-gcc11-opt/setup.sh
 cmake -B build -S . -D CMAKE_INSTALL_PREFIX=install
 cmake --build build -- install
 export LD_LIBRARY_PATH=$PWD/install/lib:$LD_LIBRARY_PATH
+```
+
+The LCG stack is built for many other operative systems, like ubuntu or mac:
+```
+$ ls /cvmfs/sft.cern.ch/lcg/views/dev4/latest/ -lh
+total 8.5K
+lrwxrwxrwx. 1 cvmfs cvmfs 32 May 10 13:33 aarch64-centos7-gcc11-opt -> ../Fri/aarch64-centos7-gcc11-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 28 May 13 10:26 aarch64-el9-gcc11-opt -> ../Mon/aarch64-el9-gcc11-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 28 May 13 10:09 aarch64-el9-gcc13-opt -> ../Mon/aarch64-el9-gcc13-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 31 May 10 02:54 arm64-mac12-clang140-opt -> ../Fri/arm64-mac12-clang140-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 31 Mar  9 13:28 arm64-mac13-clang150-opt -> ../Sat/arm64-mac13-clang150-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 31 May 13 04:41 x86_64-centos7-gcc11-dbg -> ../Mon/x86_64-centos7-gcc11-dbg
+lrwxrwxrwx. 1 cvmfs cvmfs 31 May 13 08:04 x86_64-centos7-gcc11-opt -> ../Mon/x86_64-centos7-gcc11-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 27 May 13 05:17 x86_64-el8-gcc11-opt -> ../Mon/x86_64-el8-gcc11-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 29 May 13 02:10 x86_64-el9-clang16-dbg -> ../Mon/x86_64-el9-clang16-dbg
+lrwxrwxrwx. 1 cvmfs cvmfs 29 May 13 00:28 x86_64-el9-clang16-opt -> ../Mon/x86_64-el9-clang16-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 27 May 13 01:51 x86_64-el9-gcc11-opt -> ../Mon/x86_64-el9-gcc11-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 27 May 13 03:14 x86_64-el9-gcc12-dbg -> ../Mon/x86_64-el9-gcc12-dbg
+lrwxrwxrwx. 1 cvmfs cvmfs 27 May 13 02:51 x86_64-el9-gcc12-opt -> ../Mon/x86_64-el9-gcc12-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 27 May 13 01:33 x86_64-el9-gcc13-dbg -> ../Mon/x86_64-el9-gcc13-dbg
+lrwxrwxrwx. 1 cvmfs cvmfs 27 May 13 01:11 x86_64-el9-gcc13-opt -> ../Mon/x86_64-el9-gcc13-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 33 May 13 05:52 x86_64-ubuntu2004-gcc9-opt -> ../Mon/x86_64-ubuntu2004-gcc9-opt
+lrwxrwxrwx. 1 cvmfs cvmfs 34 May 13 06:28 x86_64-ubuntu2204-gcc11-opt -> ../Mon/x86_64-ubuntu2204-gcc11-opt
+
 ```
 
 To display the geometry
@@ -233,3 +257,4 @@ Documentation of ARC,
 * 25-January-2023 FCC workshop https://indico.cern.ch/event/1176398/contributions/5208403/attachments/2581656/4452921/ARC_Presentation_FCC_Workshop_Krakow_25th_January_2023.pdf
 * 28-March-2023 Discussion about ARC implementation in DD4hep: https://indico.cern.ch/event/1266428/
 * 8-June-2023 FCC week https://indico.cern.ch/event/1202105/contributions/5396830/attachments/2662099/4612055/fccweek23_atd_v7.pdf
+* 1-Feb-2024 FCC workshop, https://indico.cern.ch/event/1307378/contributions/5729665/attachments/2789636/4867784/fccphysweek24_ARC_reco_atd_240130.pdf
