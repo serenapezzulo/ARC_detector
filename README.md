@@ -14,14 +14,19 @@ The directory structure is the following
 
 # Basic commands
 
-Build with `cmake`, for an Alma9 machine run
-```bash
-source /cvmfs/sft.cern.ch/lcg/views/dev4/latest/x86_64-el9-gcc11-opt/setup.sh
-cmake -B build -S . -D CMAKE_INSTALL_PREFIX=install
-cmake --build build -- install
-export LD_LIBRARY_PATH=$PWD/install/lib:$LD_LIBRARY_PATH
-```
+## Software stacks
 
+There are two software stacks that can be used from CVMFS, LCG or Key4hep: 
+
+* The preferred software stack for FCCee studies is key4hep. Please use the stable release for long-term studies. Nightlies is experimental
+```
+source /cvmfs/sw.hsf.org/key4hep/setup.sh
+#source /cvmfs/sw-nightlies.hsf.org/key4hep/setup.sh
+```
+* LCG can be used as well, in case of alma9 OS:
+```
+source /cvmfs/sft.cern.ch/lcg/views/dev4/latest/x86_64-el9-gcc11-opt/setup.sh
+```
 The LCG stack is built for many other operative systems, like ubuntu or mac:
 ```
 $ ls /cvmfs/sft.cern.ch/lcg/views/dev4/latest/ -lh
@@ -45,6 +50,16 @@ lrwxrwxrwx. 1 cvmfs cvmfs 33 May 13 05:52 x86_64-ubuntu2004-gcc9-opt -> ../Mon/x
 lrwxrwxrwx. 1 cvmfs cvmfs 34 May 13 06:28 x86_64-ubuntu2204-gcc11-opt -> ../Mon/x86_64-ubuntu2204-gcc11-opt
 
 ```
+
+## Build this project
+
+Build with `cmake`
+```bash
+cmake -B build -S . -D CMAKE_INSTALL_PREFIX=install
+cmake --build build -- install
+export LD_LIBRARY_PATH=$PWD/install/lib:$LD_LIBRARY_PATH
+```
+
 
 To display the geometry
 
@@ -86,7 +101,14 @@ ddsim --compactFile ./compact/arc_v0.xml --runType run --part.userParticleHandle
 
 # Run simulation
 
-The script `arcsim.py` is a ddsim steering file, which enable Qt visualization, setup the cerenkov physic lists and the default input and output files. The configuration inside the steering file can be overriden if options are added after the name of the steering file (see -N 1 example below). 
+The preferred way to run the simulation is via command line, using ddsim as follows:
+```
+ddsim --steeringFile arc_v0_steering.py -N 10 --outputFile myout.root
+```
+
+ddsim is an interface to the Geant4. Some features are particular for the ARC, and they are defined in a steering file `arc_v0_steering.py`. Some options can be defined using the command line, which overwrites any configuration from the steering file. This can be useful to change the particle gun options, the number of evens, etc.
+
+Alternatively, we can use DDG4 components directly. The script `arcsim.py` is a ddsim steering file, which enable Qt visualization, setup the cerenkov physic lists and the default input and output files. The configuration inside the steering file can be overriden if options are added after the name of the steering file (see -N 1 example below). 
 
 Use this command to open the Geant4 Qt application,
 
