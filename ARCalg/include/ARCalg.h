@@ -25,7 +25,6 @@
 #define ARCALG_H
 
 #include "Gaudi/Property.h"
-#include "GaudiAlg/Transformer.h"
 #include "GaudiKernel/RndmGenerators.h"
 
 // EDM4HEP
