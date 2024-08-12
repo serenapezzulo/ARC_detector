@@ -169,7 +169,7 @@
     StatusCode ARCalg::finalize() { 
 
         if(m_create_debug_histos.value()){
-            std::unique_ptr<TFile> f(TFile::Open("debug.root", "RECREATE"));
+            std::unique_ptr<TFile> f(TFile::Open("Reconstruction.root", "RECREATE"));
             hThetaRecoTrue->Write();
             hThetaRecoEm->Write();
             }
