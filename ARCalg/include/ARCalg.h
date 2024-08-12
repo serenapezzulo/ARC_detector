@@ -12,6 +12,8 @@
  * Processor produces collection of ParticleID<br>
  * @param ARC_simhits The name of input collection, type edm4hep::SimTrackerHitCollection <br>
  * (default name empty) <br>
+ * @param MCParticles The name of input collection, type edm4hep::MCParticleCollection <br>
+ * 
  * @param ARC_PID The name of output collection, type edm4hep::ParticleID <br>
  * (default name "ARC_PID") <br>
  * @param GeoSvcName Geometry service name <br>
@@ -26,9 +28,16 @@
 
 #include "Gaudi/Property.h"
 #include "GaudiKernel/RndmGenerators.h"
+#include "Reconstruction.h"
+
+#include "TH1D.h"
+#include <TApplication.h>
+#include "TFile.h"
+#include <TCanvas.h>
 
 // EDM4HEP
 #include "edm4hep/SimTrackerHitCollection.h"
+#include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/ParticleIDCollection.h"
 #include "edm4hep/EventHeaderCollection.h"
 
@@ -43,19 +52,21 @@
 #include <string>
 
 using colltype_in  = edm4hep::SimTrackerHitCollection;
+using colltype_mc  = edm4hep::MCParticleCollection;
 using colltype_out = edm4hep::ParticleIDCollection;
 
 struct ARCalg final
     : k4FWCore::MultiTransformer<
           std::tuple<colltype_out>(
-              const colltype_in&, const edm4hep::EventHeaderCollection&)> {
+              const colltype_in&, const colltype_mc&, const edm4hep::EventHeaderCollection&)> {
   ARCalg(const std::string& name, ISvcLocator* svcLoc);
+
 
   StatusCode initialize() override;
   StatusCode finalize() override;
 
   std::tuple<colltype_out> operator()(
-      const colltype_in& ,
+      const colltype_in& , const colltype_mc& ,
       const edm4hep::EventHeaderCollection&   ) const override;
 
 private:
@@ -82,6 +93,11 @@ private:
   dd4hep::Position mirrorCenter;
   double mirrorRadius;
 
+  /// Flag to create output file with debug histgrams
+  Gaudi::Property<bool> m_create_debug_histos{this, "create_debug_histograms", true, "Create output file with histograms for debugging"};
+   TH1D* hThetaRecoTrue;
+   TH1D* hThetaRecoEm;
+ 
 
 };
 
