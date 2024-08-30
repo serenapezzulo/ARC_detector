@@ -97,6 +97,14 @@ private:
   Gaudi::Property<bool> m_create_debug_histos{this, "create_debug_histograms", true, "Create output file with histograms for debugging"};
    TH1D* hThetaRecoTrue;
    TH1D* hThetaRecoEm;
+   TH1D* hThetaErrorEm;
+   TH2F* hPixelID;
+   TH2F* hTrueHit;
+   TH2F* hPixelHit;
+   TH1D* hPixelError;
+   TH1D* hThetaRecoPixel;
+   TH1D* hPhotonYield;
+
  
 
 };

@@ -3,25 +3,25 @@
 #include <cmath> 
 #include <gsl/gsl_complex.h>
 #include "ArcQuarticEquation.h"
-   // ROOT
-    #include "TGeoBoolNode.h"
-    #include <TGeoManager.h>
+// ROOT
+#include "TGeoBoolNode.h"
+#include <TGeoManager.h>
 
 
-    // Math
-    #include "Math/Math.h"
-    #include "Math/Rotation3D.h"
-    #include "Math/RotationX.h"
-    #include "Math/RotationY.h"
-    #include "Math/RotationZ.h"
-    #include "Math/Transform3D.h"
-    #include "Math/Vector3D.h"
-    #include "Math/AxisAngle.h"
- 
+// Math
+#include "Math/Math.h"
+#include "Math/Rotation3D.h"
+#include "Math/RotationX.h"
+#include "Math/RotationY.h"
+#include "Math/RotationZ.h"
+#include "Math/Transform3D.h"
+#include "Math/Vector3D.h"
+#include "Math/AxisAngle.h"
 
-    // STL
-    #include <iostream>
-    #include <sstream>
+
+// STL
+#include <iostream>
+#include <sstream>
 
 
 

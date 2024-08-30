@@ -1,10 +1,18 @@
     #include "ARCalg.h"
     #include "ArcQuarticEquation.h"
     #include "Reconstruction.h"
+    //#include "Intersection.h"
+    #include "test.h"
+    #include <TVector3.h>
 
     // ROOT
     #include "TGeoBoolNode.h"
     #include <TGeoManager.h>
+    #include "TGeoManager.h"
+    #include "TGeoBBox.h"
+    #include "Math/Point3D.h"
+    #include "Math/Vector3D.h"
+    
 
 
     // STL
@@ -95,10 +103,25 @@
         info() << ss.str().c_str() <<endmsg;
 
         if(m_create_debug_histos.value()){
-            hThetaRecoTrue = new TH1D("hThetaRecoTrue", "Reconstructed Theta", 100, 0, 0.3);
+            hThetaRecoTrue = new TH1D("hThetaRecoTrue", "Reconstructed Theta", 100, 0, 0.07);
             hThetaRecoTrue->SetDirectory(0);
-            hThetaRecoEm = new TH1D("hThetaRecoEm", "Reconstructed Theta", 100, 0, 0.3);
+            hThetaRecoEm = new TH1D("hThetaRecoEm", "Reconstructed Theta", 100, 0, 0.07);
             hThetaRecoEm->SetDirectory(0);
+            hThetaErrorEm = new TH1D("hThetaErrorEm", "Reconstructed Theta Error", 100, -0.05, 0.05);
+            hThetaErrorEm->SetDirectory(0);
+            hPixelID = new TH2F("hPixelID", "Pixel ID", 100,0,100,100,0,100 );
+            hPixelID->SetDirectory(0);
+            hTrueHit = new TH2F("hTrueHit", "Pixel Position", 100, -5, 5, 100, -5, 5);
+            hTrueHit->SetDirectory(0);
+            hPixelHit = new TH2F("hPixelHit", "Pixel Hit (center)", 100, -5, 5, 100, -5, 5);
+            hPixelHit->SetDirectory(0);
+            hPixelError = new TH1D("hPixelError", "Pixel Error", 100, -0.05, 0.05);
+            hPixelError->SetDirectory(0);
+            hThetaRecoPixel = new TH1D("hThetaRecoPixel", "Reconstructed Theta", 100, 0, 0.07);
+            hThetaRecoPixel->SetDirectory(0);
+            hPhotonYield = new TH1D("hPhotonYield", "Photon Yield", 100, 0, 150);
+            hPhotonYield->SetDirectory(0);
+
         }
 
       
@@ -106,6 +129,7 @@
     }
 
     
+
     ///////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////       operator()       ////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -122,6 +146,24 @@
         //loop over hit collection
         for (const auto& input_sim_hit : input_sim_hits) {
         dd4hep::DDSegmentation::CellID id = input_sim_hit.getCellID();
+         //pixels ID -> integer numbers
+        double pixel_x = m_decoder->get(id, "x");
+        double pixel_y = m_decoder->get(id, "y");
+        auto pixelcenter_x = -3.96 + pixel_x*0.08;
+        auto pixelcenter_y = -3.96 + pixel_y*0.08;
+       
+        
+        auto truehit_x = input_sim_hit.getPosition().x;
+        auto truehit_y = input_sim_hit.getPosition().y;
+
+
+       const edm4hep::MCParticle& photon = input_sim_hit.getMCParticle();
+
+        // Get the emission point (vertex) of the photon
+        auto emissionPoint = photon.getVertex();
+
+        ROOT::Math::XYZPoint EmissionPointTrue(emissionPoint.x, emissionPoint.y, emissionPoint.z);
+
      
         // Convert edm4hep::Vector3d to ROOT::Math::XYZVector
         ROOT::Math::XYZPoint DetectionPointTrue(input_sim_hit.getPosition().x,
@@ -132,20 +174,60 @@
                             input_mc_particles.momentum().at(0).y,
                             input_mc_particles.momentum().at(0).z);
 
-        ROOT::Math::XYZPoint EmissionPointApprox(Trace.x()/2, Trace.y()/2, Trace.z()/2);
 
-        ROOT::Math::XYZPoint EmissionPointTrue(input_mc_particles.vertex().at(0).x,
-                                    input_mc_particles.vertex().at(0).y,
-                                    input_mc_particles.vertex().at(0).z);
+        ROOT::Math::XYZPoint DetectionPointPixel = ROOT::Math::XYZPoint(pixelcenter_x*10, pixelcenter_y*10, input_sim_hit.getPosition().z);
         
-        
+
         double TrueAngle = reconstruct(mirrorRadius, EmissionPointTrue, DetectionPointTrue, Trace);
-        //std::cout << "True angle: " << TrueAngle << std::endl;
+        
+        
+       //Calculate the approx emission point and the emission point error
+
+        // Define a dummy TGeoBBox (surface) that cuts the cell in half in the z direction
+        double dx = 135.0;  
+        double dy = 135.0;  
+        double dz = 1e-7;  
+        TGeoBBox* dummyBox = new TGeoBBox("dummyBox", dx, dy, dz);
+        
+        //get the shooting point (vertex) of the parent particle
+        const edm4hep::MCParticle& mcParticle = input_sim_hit.getMCParticle();
+        const edm4hep::MCParticle& parentParticle = mcParticle.getParents(0);
+        auto shootingPoint = parentParticle.getVertex();
+        ROOT::Math::XYZPoint ShootingPointTrue(shootingPoint.x, shootingPoint.y, shootingPoint.z);
+
+
+        // Calculate the intersection between the track and the dummy box
+        ROOT::Math::XYZPoint EmissionPointApprox = CalculateIntersectionPoint(dummyBox, ShootingPointTrue, Trace);
+
+        
         double Angle_em = reconstruct(mirrorRadius, EmissionPointApprox, DetectionPointTrue, Trace);
         
+    
+        std::cout << "Trace: " << Trace << std::endl;
+        //std::cout << "entering point" << enteringpoint << std::endl;
+        std::cout << "EmissionPointApprox: " << EmissionPointApprox << std::endl;
+        std::cout << "EmissionPointTrue: " << EmissionPointTrue << std::endl;
+        
+        double Angle_pixel = reconstruct(mirrorRadius, EmissionPointTrue, DetectionPointPixel, Trace);
+        
+
+
+
+
         if(m_create_debug_histos.value()){
             hThetaRecoTrue->Fill(TrueAngle);
             hThetaRecoEm->Fill(Angle_em);
+            hThetaErrorEm->Fill(Angle_em - TrueAngle);
+            hPixelID->Fill(pixel_x, pixel_y);
+            hTrueHit->Fill(truehit_x*0.1, truehit_y*0.1);
+            hPixelHit->Fill(pixelcenter_x, pixelcenter_y);
+            hThetaRecoPixel->Fill(Angle_pixel);
+            hPixelError->Fill(Angle_pixel - TrueAngle);
+            hPhotonYield->Fill(input_sim_hits.size());
+
+        
+
+            
         }
     
        
@@ -167,11 +249,25 @@
     ///////////////////////       finalize       //////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
     StatusCode ARCalg::finalize() { 
+        
+        
 
         if(m_create_debug_histos.value()){
             std::unique_ptr<TFile> f(TFile::Open("Reconstruction.root", "RECREATE"));
+
+          
+
             hThetaRecoTrue->Write();
             hThetaRecoEm->Write();
+            hThetaErrorEm->Write();
+            hPixelID->Write();
+            hTrueHit->Write();
+            hPixelHit->Write();
+            hPixelError->Write();
+            hThetaRecoPixel->Write();
+            hPhotonYield->Write();
+        
+            
             }
         
         
