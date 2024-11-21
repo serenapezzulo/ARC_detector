@@ -37,10 +37,10 @@
   <constant name="SENSOR_THICKNESS"       value="0.2*cm"    />
   <constant name="SENSOR_X"               value="8.0*cm"    />
   <constant name="SENSOR_Y"               value="8.0*cm"    />
-  <constant name="SENSOR_NStripsX"        value="100"       />
-  <constant name="SENSOR_NStripsY"        value="100"       />
-  <constant name="SENSOR_pitchX"          value="0.08*cm" />
-  <constant name="SENSOR_pitchY"          value="0.08*cm" />
+  <constant name="SENSOR_NStripsX"        value="160"       />
+  <constant name="SENSOR_NStripsY"        value="160"       />
+  <constant name="SENSOR_pitchX"          value="0.05*cm" />
+  <constant name="SENSOR_pitchY"          value="0.05*cm" />
   <constant name="MIRROR_THICKNESS"       value="0.2*cm"    />
   <constant name="MIRROR_RADIUS"          value="36.9*cm"   />
   <constant name="COOLING_THICKNESS"      value="0.5*cm"    />
@@ -106,14 +106,25 @@
   </mirror>
 
 <!-- /detectors/detector/aerogel -->
+
+<aerogel>
+   
+    <module
+      material="Aerogel_PFRICH"
+      vis="gas_vis"
+      thickness="AEROGEL_THICKNESS"
+      />
+  </aerogel>
+<!--
   <aerogel>
-    <!-- /detectors/detector/aerogel/module -->
+   
     <module
       material="Aerogel_PFRICH"
       vis="aerogel_vis"
       thickness="AEROGEL_THICKNESS"
       />
   </aerogel>
+-->
 
 <!-- /detectors/detector/cooling -->
   <cooling>

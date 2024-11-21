@@ -71,6 +71,7 @@ struct ARCalg final
 
 private:
 
+  ROOT::Math::XYZPoint mirrorCenterXYZ;
   /// Geometry service name
   Gaudi::Property<std::string> m_geoSvcName{this, "GeoSvcName", "GeoSvc", "The name of the GeoSvc instance"};
 
@@ -96,6 +97,7 @@ private:
   /// Flag to create output file with debug histgrams
   Gaudi::Property<bool> m_create_debug_histos{this, "create_debug_histograms", true, "Create output file with histograms for debugging"};
    TH1D* hThetaRecoTrue;
+  TH1D* hThetaReco;
    TH1D* hThetaRecoEm;
    TH1D* hThetaErrorEm;
    TH2F* hPixelID;
@@ -104,8 +106,19 @@ private:
    TH1D* hPixelError;
    TH1D* hThetaRecoPixel;
    TH1D* hPhotonYield;
-
- 
+  TH1D* hEmissionZTrue;
+  TH1D* hEmissionXTrue;
+  TH1D* hEmissionYTrue;
+  TH1D* hThetaRecoGas;
+  TH1D* hThetaRecoAerogel;
+  TH1D* hPhotonYieldGas;
+  TH1D* hPhotonYieldAerogel;
+  TH1D* hThetaGas;
+  TH1D* hThetaAerogel;
+  TH1D* hThetaGen;
+  TH1D* hRecoGen;
+  TH1D* hEMerrorGas;
+  TH1D* hEMerrorAerogel;
 
 };
 

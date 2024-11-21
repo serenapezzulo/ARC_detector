@@ -91,7 +91,8 @@
         std::cout << std::endl;
         ROOT::Math::XYZVector delta[2]={ROOT::Math::XYZVector(0.0,0.0,0.0), ROOT::Math::XYZVector(0.0,0.0,0.0)};
         ROOT::Math::XYZVector delta_pi[2]={ROOT::Math::XYZVector(0.0,0.0,0.0), ROOT::Math::XYZVector(0.0,0.0,0.0)};
-
+	double angle[2];
+	double angle_pi[2];
     //tra le 2 soluzioni reali ne prendo una in base alla geometria 
     //proviamo con quella più vicina a (0,0,0)
     std::vector<ROOT::Math::XYZPoint> Mv; //vettore di punti M
@@ -124,26 +125,95 @@
         double    pmag     = pow( EM.Mag2(), 0.5 );
         double    tmag     = pow( Trace.Mag2(), 0.5 );
         double    aAngle   = ( ( pmag * tmag ) != 0.0 ) ? acos( ( EM.Dot( Trace ) ) / ( pmag * tmag ) ) : 0.0;
-    
-        
+	//std::cout<<"aAngle "<<aAngle<<std::endl;
+	angle[i]=aAngle;
+	
         ROOT::Math::XYZVector EM_pi = M_pi - EmissionPoint;
         ROOT::Math::XYZVector p_pi = EM_pi.Unit();
 
         double    pmag_pi     = pow( EM_pi.Mag2(), 0.5 );
         double    tmag_pi     = pow( Trace.Mag2(), 0.5 );
         double    aAngle_pi   = ( ( pmag_pi * tmag_pi ) != 0.0 ) ? acos( ( EM_pi.Dot( Trace ) ) / ( pmag_pi * tmag_pi ) ) : 0.0;
-       
-        
+	//std::cout<<"aAngle_pi "<<aAngle_pi<<std::endl;
+        angle_pi[i]=aAngle_pi;
     }
 
 
+//QUI c'è la condizione hard coded con 0.05
+    double n_gas = 1.00135; //C4F10 refractive index
+    double n_aerogel = 1.025; //aerogel refractive index
+    double mass = 0.4937; //kaon mass in GeV
+    double momentum = 50; //da passare in maniera più efficiente
+    double beta = momentum/sqrt(pow(mass,2)+pow(momentum,2));
+    std::cout<<"beta "<<beta<<std::endl;
+    double angle_gas = acos(1/(beta*n_gas)); //già in radianti
+    double angle_aerogel = acos(1/(beta*n_aerogel));
+    std::cout<<"angle_gas "<<angle_gas<<std::endl;
+    std::cout<<"angle_aerogel "<<angle_aerogel<<std::endl;
+    
+    std::cout<<"angle[0] "<<angle[0]<<std::endl;
+    std::cout<<"angle[1] "<<angle[1]<<std::endl;
+    
+    ROOT::Math::XYZPoint punto(0.0, 0.0, 0.0);
+    if (n_real_sol >=0){
+    std::array<double, 4> differences = {
+        TMath::Abs(angle[0] - angle_gas),
+        TMath::Abs(angle[1] - angle_gas),
+        TMath::Abs(angle[0] - angle_aerogel),
+        TMath::Abs(angle[1] - angle_aerogel)
+    };
+
+    // Find the minimum difference and its index
+    auto min_it = std::min_element(differences.begin(), differences.end());
+    int min_index = std::distance(differences.begin(), min_it);
+    std::cout<<"diff[i]"<<differences[1]<< ", "<< differences[2] <<", "<<  differences[3] <<", "<<  differences[4]<<std::endl;
+    std::cout<<"min index "<<min_index<<std::endl;
+
+    //mettere if con theta true se la differenza è maggiore di tot flag (1.5 mrad)
+
+    //counter per vedere da dove vengono i fotoni
+    //però non può stare qui perchè ne facciamo uno alla volta
+/*
+    int gamma_gas = 0; 
+    int gamma_aerogel = 0;
+    for (int i = 0; i < 10000; i++){
+        if (min_index == 0 || min_index == 1) {
+            gamma_gas += 1;
+        } else {
+            gamma_aerogel += 1;
+        }
+    }
+*/
+
+    // Determine corresponding delta vector
+    ROOT::Math::XYZVector delta_fin;
+    if (min_index < 2) {
+        delta_fin = delta[min_index];
+    } else {
+        delta_fin = delta[min_index - 2];
+    }
+        punto = CoC + delta_fin;
+    }
+/*
+    double angle_fin;
     ROOT::Math::XYZPoint punto(0.0, 0.0, 0.0);
     if(n_real_sol >=0){
         ROOT::Math::XYZVector delta_fin;
-        delta_fin = ( ( n_real_sol == 0 ) || ( delta[0].z() > delta[1].z() ) ) ? delta[0] : delta[1];
+	double tmp1,tmp2;
+	tmp1 = TMath::Abs(angle[0]-angle_gas);
+	tmp2 = TMath::Abs(angle[1]-angle_gas);
+    pippo1 = TMath::Abs(angle[0]-angle_aerogel);
+    pippo2 = TMath::Abs(angle[1]-angle_aerogel);
+    
+	if(tmp1<tmp2){
+	  //delta_fin = ( ( n_real_sol == 0 ) || ( delta[0].z() > delta[1].z() ) ) ? delta[0] : delta[1];
+	  delta_fin=delta[0];
+	}else{
+	  delta_fin=delta[1];
+	}
         punto = CoC + delta_fin;
     }
-
+*/
 
     ROOT::Math::XYZVector EM_fin = (punto - EmissionPoint);
     ROOT::Math::XYZVector p_fin = EM_fin.Unit();
@@ -153,7 +223,7 @@
     
     
     
-
+    //std::cout<<"angle fin "<<aAngle_fin<<std::endl;
     return aAngle_fin;//theta;
     }
 
